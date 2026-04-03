@@ -9,21 +9,30 @@ use Illuminate\Support\Facades\DB;
 class SuratNumberService
 {
     /**
-     * Generate nomor surat unik per jenis surat dan tahun.
+     * Generate nomor surat unik per kategori surat dan tahun.
      */
     public function generate(JenisSurat $jenisSurat, ?int $tahun = null): string
     {
         $tahun ??= (int) now()->format('Y');
+        $jenisSurat->loadMissing('kategoriSurat');
+        $kategoriId = $jenisSurat->kategori_surat_id;
 
-        return DB::transaction(function () use ($jenisSurat, $tahun): string {
-            $counter = CounterSurat::query()
-                ->where('jenis_surat_id', $jenisSurat->id)
+        return DB::transaction(function () use ($jenisSurat, $tahun, $kategoriId): string {
+            $counterQuery = CounterSurat::query()
                 ->where('tahun', $tahun)
-                ->lockForUpdate()
-                ->first();
+                ->lockForUpdate();
+
+            if ($kategoriId) {
+                $counterQuery->where('kategori_surat_id', $kategoriId);
+            } else {
+                $counterQuery->where('jenis_surat_id', $jenisSurat->id);
+            }
+
+            $counter = $counterQuery->first();
 
             if (! $counter) {
                 $counter = CounterSurat::create([
+                    'kategori_surat_id' => $kategoriId,
                     'jenis_surat_id' => $jenisSurat->id,
                     'tahun' => $tahun,
                     'last_number' => 0,
@@ -33,7 +42,9 @@ class SuratNumberService
             $counter->increment('last_number');
             $counter->refresh();
 
-            return sprintf('%04d/%s/SMKN1-Krangkeng/%d', $counter->last_number, $jenisSurat->kode, $tahun);
+            $kode = $jenisSurat->kategoriSurat?->kode ?? $jenisSurat->kode;
+
+            return sprintf('%04d/%s/SMKN1-Krangkeng/%d', $counter->last_number, $kode, $tahun);
         });
     }
 }

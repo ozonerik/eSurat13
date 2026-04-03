@@ -2,11 +2,14 @@
 
 namespace App\Filament\Resources\Surats\Tables;
 
+use App\Models\KategoriSurat;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class SuratsTable
 {
@@ -43,7 +46,15 @@ class SuratsTable
                     ->sortable(),
             ])
             ->filters([
-                //
+                SelectFilter::make('kategori_surat_id')
+                    ->label('Kategori')
+                    ->options(fn () => KategoriSurat::query()->pluck('nama', 'id')->all())
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['value'] ?? null,
+                            fn (Builder $query, $value) => $query->whereHas('jenisSurat', fn (Builder $jenisQuery) => $jenisQuery->where('kategori_surat_id', $value))
+                        );
+                    }),
             ])
             ->recordActions([
                 EditAction::make(),

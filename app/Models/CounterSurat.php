@@ -12,6 +12,7 @@ class CounterSurat extends Model
     use HasFactory;
 
     protected $fillable = [
+        'kategori_surat_id',
         'jenis_surat_id',
         'tahun',
         'last_number',
@@ -28,5 +29,10 @@ class CounterSurat extends Model
     public function jenisSurat(): BelongsTo
     {
         return $this->belongsTo(JenisSurat::class);
+    }
+
+    public function kategoriSurat(): BelongsTo
+    {
+        return $this->belongsTo(KategoriSurat::class);
     }
 }

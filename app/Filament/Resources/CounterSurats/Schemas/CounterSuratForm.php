@@ -12,8 +12,9 @@ class CounterSuratForm
     {
         return $schema
             ->components([
-                Select::make('jenis_surat_id')
-                    ->relationship('jenisSurat', 'nama')
+                Select::make('kategori_surat_id')
+                    ->label('Kategori Surat')
+                    ->relationship('kategoriSurat', 'nama')
                     ->searchable()
                     ->preload()
                     ->required(),

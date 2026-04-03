@@ -1,34 +1,26 @@
 <?php
 
-namespace App\Filament\Resources\JenisSurats\Tables;
+namespace App\Filament\Resources\KategoriSurats\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
-class JenisSuratsTable
+class KategoriSuratsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('kategoriSurat.nama')
-                    ->label('Kategori')
-                    ->searchable()
-                    ->sortable(),
                 TextColumn::make('kode')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('nama')
                     ->searchable()
                     ->sortable(),
-                IconColumn::make('requires_approval')
-                    ->label('Approval')
-                    ->boolean(),
                 IconColumn::make('is_active')
                     ->label('Aktif')
                     ->boolean(),
@@ -37,9 +29,7 @@ class JenisSuratsTable
                     ->sortable(),
             ])
             ->filters([
-                SelectFilter::make('kategori_surat_id')
-                    ->label('Kategori')
-                    ->relationship('kategoriSurat', 'nama'),
+                //
             ])
             ->recordActions([
                 EditAction::make(),

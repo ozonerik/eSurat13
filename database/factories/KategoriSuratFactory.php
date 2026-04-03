@@ -3,13 +3,12 @@
 namespace Database\Factories;
 
 use App\Models\KategoriSurat;
-use App\Models\JenisSurat;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<JenisSurat>
+ * @extends Factory<KategoriSurat>
  */
-class JenisSuratFactory extends Factory
+class KategoriSuratFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -19,12 +18,8 @@ class JenisSuratFactory extends Factory
     public function definition(): array
     {
         return [
-            'kategori_surat_id' => KategoriSurat::factory(),
-            'kode' => strtoupper(fake()->unique()->lexify('???')),
+            'kode' => strtoupper(fake()->unique()->lexify('KAT-???')),
             'nama' => fake()->unique()->words(2, true),
-            'deskripsi' => fake()->sentence(),
-            'template_path' => 'templates/'.fake()->slug().'.docx',
-            'requires_approval' => fake()->boolean(90),
             'is_active' => true,
         ];
     }

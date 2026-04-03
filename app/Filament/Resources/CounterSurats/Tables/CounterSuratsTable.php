@@ -14,8 +14,8 @@ class CounterSuratsTable
     {
         return $table
             ->columns([
-                TextColumn::make('jenisSurat.nama')
-                    ->label('Jenis Surat')
+                TextColumn::make('kategoriSurat.nama')
+                    ->label('Kategori Surat')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('tahun')
