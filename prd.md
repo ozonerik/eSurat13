@@ -90,7 +90,7 @@ Jika dalam **24 jam** setelah booking belum di-upload draft → nomor surat **ot
 ### 4.4 QR Code Verifikasi
 - Generate verification token saat approve.  
 - Embed QR Code di pojok kanan bawah halaman terakhir.  
-- Halaman verifikasi publik: `https://esurat.smkn1krangkeng.ac.id/verify?token=xxx`
+- Halaman verifikasi publik: `/verify?token=xxx`
 
 ### 4.5 Notifikasi Telegram (Bot API Resmi)
 - Menggunakan **Telegram Bot API**[](https://core.telegram.org/bots/api).  
