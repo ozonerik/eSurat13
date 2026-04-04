@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Surats\Tables;
 
 use App\Models\KategoriSurat;
+use App\Models\JenisSurat;
 use App\Models\Surat;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -29,7 +30,7 @@ class SuratsTable
                 TextColumn::make('jenisSurat.template_path')
                     ->label('Template')
                     ->state(fn (Surat $record): string => filled($record->jenisSurat?->template_path) ? 'Download' : '-')
-                    ->url(fn (Surat $record): ?string => filled($record->jenisSurat?->template_path) ? Storage::url($record->jenisSurat->template_path) : null)
+                    ->url(fn (Surat $record): ?string => self::resolveTemplateUrl($record->jenis_surat_id))
                     ->openUrlInNewTab(),
                 TextColumn::make('pembuat.name')
                     ->label('Pembuat')
@@ -75,5 +76,26 @@ class SuratsTable
                     DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    protected static function resolveTemplateUrl(?int $jenisSuratId): ?string
+    {
+        if (blank($jenisSuratId)) {
+            return null;
+        }
+
+        $templatePath = JenisSurat::query()
+            ->whereKey($jenisSuratId)
+            ->value('template_path');
+
+        if (blank($templatePath)) {
+            return null;
+        }
+
+        if (Storage::disk('public')->exists($templatePath) || Storage::disk('local')->exists($templatePath)) {
+            return route('templates.download', ['jenisSurat' => $jenisSuratId]);
+        }
+
+        return null;
     }
 }

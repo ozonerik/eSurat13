@@ -32,6 +32,7 @@ class JenisSuratForm
                     ->maxLength(255),
                 FileUpload::make('template_path')
                     ->label('Upload Template')
+                    ->disk('public')
                     ->directory('templates')
                     ->acceptedFileTypes([
                         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',

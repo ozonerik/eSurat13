@@ -142,6 +142,10 @@ class SuratForm
             return null;
         }
 
-        return Storage::url($templatePath);
+        if (Storage::disk('public')->exists($templatePath) || Storage::disk('local')->exists($templatePath)) {
+            return route('templates.download', ['jenisSurat' => $jenisSuratId]);
+        }
+
+        return null;
     }
 }
