@@ -17,6 +17,7 @@ class KepalaSekolahSeeder extends Seeder
             [
                 'nama_kepala_sekolah' => 'Taufik Rohmanuddin, S.Pd., M.Eng',
                 'pangkat_golongan' => 'Pembina Tk.I, IV/b',
+                'telp' => null,
                 'tanda_tangan' => null,
                 'is_active' => true,
             ],

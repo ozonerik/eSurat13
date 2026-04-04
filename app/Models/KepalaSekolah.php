@@ -14,6 +14,7 @@ class KepalaSekolah extends Model
         'nip',
         'nama_kepala_sekolah',
         'pangkat_golongan',
+        'telp',
         'tanda_tangan',
         'is_active',
     ];

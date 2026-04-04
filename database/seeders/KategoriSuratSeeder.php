@@ -13,6 +13,7 @@ class KategoriSuratSeeder extends Seeder
     public function run(): void
     {
         $items = [
+            ['kode' => '000', 'nama' => 'Umum'],
             ['kode' => '421', 'nama' => 'Urusan Sekolah (Umum)'],
             ['kode' => '421.3', 'nama' => 'Administrasi SMA'],
             ['kode' => '421.5', 'nama' => 'Administrasi SMK'],

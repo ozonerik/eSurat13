@@ -14,6 +14,7 @@ class JenisSuratSeeder extends Seeder
     public function run(): void
     {
         $kategoriCodes = [
+            '000',
             '421',
             '421.3',
             '421.5',

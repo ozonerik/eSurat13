@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('nip', 30)->unique();
             $table->string('nama_kepala_sekolah');
             $table->string('pangkat_golongan')->nullable();
+            $table->string('telp')->nullable();
             $table->string('tanda_tangan')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
