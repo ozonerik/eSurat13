@@ -29,8 +29,8 @@ class SuratsTable
                     ->sortable(),
                 TextColumn::make('jenisSurat.template_path')
                     ->label('Template')
-                    ->state(fn (Surat $record): string => filled($record->jenisSurat?->template_path) ? 'Download' : '-')
-                    ->url(fn (Surat $record): ?string => self::resolveTemplateUrl($record->jenis_surat_id))
+                    ->state(fn(Surat $record): string => filled($record->jenisSurat?->template_path) ? 'Download' : '-')
+                    ->url(fn(Surat $record): ?string => self::resolveTemplateUrl($record->jenis_surat_id))
                     ->openUrlInNewTab(),
                 TextColumn::make('pembuat.name')
                     ->label('Pembuat')
@@ -42,7 +42,7 @@ class SuratsTable
                     ->sortable(),
                 TextColumn::make('status')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'draft' => 'gray',
                         'booked' => 'warning',
                         'menunggu_persetujuan' => 'info',
@@ -53,6 +53,16 @@ class SuratsTable
                 TextColumn::make('tanggal_surat')
                     ->date('d M Y')
                     ->sortable(),
+                TextColumn::make('created_at')
+                    ->dateTime('d M Y H:i')
+                    ->sortable(),
+                TextColumn::make('expired_at')
+                    ->label('Expired At')
+                    ->state(fn(Surat $record) => $record->status === Surat::STATUS_BOOKED
+                        ? $record->created_at?->copy()->addDay()
+                        : null)
+                    ->dateTime('d M Y H:i')
+                    ->sortable(),
                 TextColumn::make('updated_at')
                     ->dateTime('d M Y H:i')
                     ->sortable(),
@@ -60,11 +70,11 @@ class SuratsTable
             ->filters([
                 SelectFilter::make('kategori_surat_id')
                     ->label('Kategori')
-                    ->options(fn () => KategoriSurat::query()->pluck('nama', 'id')->all())
+                    ->options(fn() => KategoriSurat::query()->pluck('nama', 'id')->all())
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             $data['value'] ?? null,
-                            fn (Builder $query, $value) => $query->whereHas('jenisSurat', fn (Builder $jenisQuery) => $jenisQuery->where('kategori_surat_id', $value))
+                            fn(Builder $query, $value) => $query->whereHas('jenisSurat', fn(Builder $jenisQuery) => $jenisQuery->where('kategori_surat_id', $value))
                         );
                     }),
             ])

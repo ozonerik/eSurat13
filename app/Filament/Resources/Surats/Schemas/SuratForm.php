@@ -157,7 +157,6 @@ class SuratForm
                     ->directory('surat')
                     ->acceptedFileTypes([
                         'application/pdf',
-                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
                     ])
                     ->disabled(function (string $operation, Get $get): bool {
                         if ($operation !== 'edit') {
