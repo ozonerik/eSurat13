@@ -20,6 +20,9 @@ class SekolahForm
                     ->unique(ignoreRecord: true),
                 TextInput::make('nss')
                     ->maxLength(20),
+                TextInput::make('kode_surat')
+                    ->label('Kode Surat')
+                    ->maxLength(50),
                 TextInput::make('nama_sekolah')
                     ->required()
                     ->maxLength(255),

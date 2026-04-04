@@ -18,6 +18,9 @@ class SekolahsTable
                     ->sortable(),
                 TextColumn::make('nss')
                     ->searchable(),
+                TextColumn::make('kode_surat')
+                    ->label('Kode Surat')
+                    ->searchable(),
                 TextColumn::make('nama_sekolah')
                     ->searchable()
                     ->sortable(),

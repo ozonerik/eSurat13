@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('npsn', 20)->unique();
             $table->string('nss', 20)->nullable();
+            $table->string('kode_surat', 50)->nullable();
             $table->string('nama_sekolah');
             $table->text('visi_sekolah')->nullable();
             $table->text('alamat_sekolah')->nullable();

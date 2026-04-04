@@ -16,6 +16,7 @@ class SekolahSeeder extends Seeder
             ['npsn' => '20241355'],
             [
                 'nss' => '321021809001',
+                'kode_surat' => 'SMKN1-Krangkeng',
                 'nama_sekolah' => 'SMKN 1 Krangkeng',
                 'visi_sekolah' => 'Mencetak lulusan yang CENDEKIA (Cerdas, Normatif, Dedikatif, Kompeten, Iman dan Taqwa)',
                 'alamat_sekolah' => 'Jl. Raya Singakerta Kec. Krangkeng',
