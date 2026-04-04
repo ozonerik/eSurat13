@@ -11,7 +11,17 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'telegram_chat_id', 'password'])]
+#[Fillable([
+    'name',
+    'nip',
+    'pangkat_golongan',
+    'telp',
+    'tanda_tangan',
+    'is_active',
+    'email',
+    'telegram_chat_id',
+    'password',
+])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {

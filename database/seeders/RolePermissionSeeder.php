@@ -35,23 +35,46 @@ class RolePermissionSeeder extends Seeder
         }
 
         $adminRole = Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'web']);
-        $pembuatRole = Role::firstOrCreate(['name' => 'Pembuat Surat', 'guard_name' => 'web']);
-        $approverRole = Role::firstOrCreate(['name' => 'Pimpinan', 'guard_name' => 'web']);
-        $viewerRole = Role::firstOrCreate(['name' => 'Viewer Arsip', 'guard_name' => 'web']);
+        $kepalaSekolahRole = Role::firstOrCreate(['name' => 'Kepala Sekolah', 'guard_name' => 'web']);
+        $guruRole = Role::firstOrCreate(['name' => 'Guru', 'guard_name' => 'web']);
+        $tuRole = Role::firstOrCreate(['name' => 'TU', 'guard_name' => 'web']);
+        $kaprogRole = Role::firstOrCreate(['name' => 'Kaprog', 'guard_name' => 'web']);
+        $wakasekRole = Role::firstOrCreate(['name' => 'Wakil Kepala Sekolah', 'guard_name' => 'web']);
+        $pengelolaSuratRole = Role::firstOrCreate(['name' => 'Pengelola Surat', 'guard_name' => 'web']);
 
         $adminRole->syncPermissions($permissions);
-        $pembuatRole->syncPermissions([
+        $guruRole->syncPermissions([
             'surat.create',
             'surat.archive.view',
         ]);
-        $approverRole->syncPermissions([
+        $kepalaSekolahRole->syncPermissions([
             'surat.review',
             'surat.approve-reject',
             'surat.archive.view',
         ]);
-        $viewerRole->syncPermissions([
+        $wakasekRole->syncPermissions([
+            'surat.review',
+            'surat.approve-reject',
             'surat.archive.view',
         ]);
+        $kaprogRole->syncPermissions([
+            'surat.create',
+            'surat.review',
+            'surat.archive.view',
+        ]);
+        $tuRole->syncPermissions([
+            'master.jenis-surat.manage',
+            'master.counter-surat.manage',
+            'telegram-chat-id.manage',
+            'surat.archive.view',
+        ]);
+        $pengelolaSuratRole->syncPermissions([
+            'surat.create',
+            'surat.review',
+            'surat.archive.view',
+        ]);
+
+        Role::whereIn('name', ['Pembuat Surat', 'Pimpinan', 'Viewer Arsip'])->delete();
 
         $admin = User::firstOrCreate(
             ['email' => env('ESURAT_ADMIN_EMAIL', 'admin@esurat.local')],
