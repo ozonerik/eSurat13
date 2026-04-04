@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Surats\Schemas;
 
 use App\Models\JenisSurat;
 use App\Models\Surat;
+use App\Models\User;
 use App\Services\SuratNumberService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
@@ -26,10 +27,63 @@ class SuratForm
             ->components([
                 Select::make('jenis_surat_id')
                     ->label('Jenis Surat')
-                    ->relationship('jenisSurat', 'nama')
+                    ->options(function (): array {
+                        return JenisSurat::query()
+                            ->with('kategoriSurat:id,kode')
+                            ->orderBy('kode')
+                            ->get()
+                            ->mapWithKeys(fn (JenisSurat $jenisSurat): array => [
+                                $jenisSurat->id => sprintf(
+                                    '%s - %s - %s',
+                                    $jenisSurat->kategoriSurat?->kode ?? '-',
+                                    $jenisSurat->kode,
+                                    $jenisSurat->nama
+                                ),
+                            ])
+                            ->all();
+                    })
+                    ->getSearchResultsUsing(function (string $search): array {
+                        return JenisSurat::query()
+                            ->with('kategoriSurat:id,kode')
+                            ->where(function (Builder $query) use ($search): void {
+                                $query
+                                    ->where('kode', 'like', "%{$search}%")
+                                    ->orWhere('nama', 'like', "%{$search}%")
+                                    ->orWhereHas('kategoriSurat', fn (Builder $kategoriQuery): Builder => $kategoriQuery->where('kode', 'like', "%{$search}%"));
+                            })
+                            ->orderBy('kode')
+                            ->limit(50)
+                            ->get()
+                            ->mapWithKeys(fn (JenisSurat $jenisSurat): array => [
+                                $jenisSurat->id => sprintf(
+                                    '%s - %s - %s',
+                                    $jenisSurat->kategoriSurat?->kode ?? '-',
+                                    $jenisSurat->kode,
+                                    $jenisSurat->nama
+                                ),
+                            ])
+                            ->all();
+                    })
+                    ->getOptionLabelUsing(function ($value): ?string {
+                        $jenisSurat = JenisSurat::query()
+                            ->with('kategoriSurat:id,kode')
+                            ->find($value);
+
+                        if (! $jenisSurat) {
+                            return null;
+                        }
+
+                        return sprintf(
+                            '%s - %s - %s',
+                            $jenisSurat->kategoriSurat?->kode ?? '-',
+                            $jenisSurat->kode,
+                            $jenisSurat->nama
+                        );
+                    })
                     ->searchable()
                     ->preload()
                     ->live()
+                    ->disabled(fn (string $operation): bool => $operation === 'edit')
                     ->hintAction(
                         Action::make('download_template')
                             ->label('Download Template')
@@ -57,6 +111,7 @@ class SuratForm
                     )
                     ->searchable()
                     ->preload()
+                    ->disabled(fn (string $operation): bool => $operation === 'edit')
                     ->required(),
                 TextInput::make('no_surat')
                     ->label('No Surat')
@@ -66,8 +121,8 @@ class SuratForm
                     ->dehydrated()
                     ->suffixAction(
                         Action::make('ambil_no_surat')
-                            ->label('Ambil No Surat')
-                            ->icon('heroicon-m-hashtag')
+                            ->label('Ambil Nomor')
+                            ->icon('heroicon-m-key')
                             ->action(function (Get $get, Set $set): void {
                                 $jenisSuratId = $get('jenis_surat_id');
 
@@ -85,17 +140,17 @@ class SuratForm
 
                                 $set('no_surat', $noSurat);
                             })
-                            ->disabled(fn (Get $get): bool => blank($get('jenis_surat_id')))
+                            ->disabled(fn (Get $get): bool => blank($get('jenis_surat_id')) || filled($get('no_surat')))
                     )
                     ->unique(ignoreRecord: true),
                 TextInput::make('perihal')
+                    ->disabled(fn (string $operation): bool => $operation === 'edit')
                     ->required()
-                    ->maxLength(255),
-                TextInput::make('tujuan')
                     ->maxLength(255),
                 DatePicker::make('tanggal_surat')
                     ->label('Tanggal Surat')
                     ->default(now()->toDateString())
+                    ->disabled(fn (string $operation): bool => $operation === 'edit')
                     ->required(),
                 FileUpload::make('surat_file_path')
                     ->label('Upload Surat')
@@ -104,6 +159,16 @@ class SuratForm
                         'application/pdf',
                         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
                     ])
+                    ->disabled(function (string $operation, Get $get): bool {
+                        if ($operation !== 'edit') {
+                            return false;
+                        }
+
+                        $isPembuat = (int) Auth::id() === (int) ($get('pembuat_id') ?? 0);
+                        $isBooked = $get('status') === Surat::STATUS_BOOKED;
+
+                        return ! ($isPembuat && $isBooked);
+                    })
                     ->openable()
                     ->downloadable(),
                 Select::make('status')
@@ -120,9 +185,21 @@ class SuratForm
                     ->dehydrated()
                     ->required(),
                 TextInput::make('verification_token')
+                    ->disabled()
+                    ->dehydrated()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true),
                 Textarea::make('rejection_note')
+                    ->visible(fn (Get $get): bool => $get('status') === Surat::STATUS_DITOLAK)
+                    ->disabled(function (string $operation): bool {
+                        if ($operation === 'edit') {
+                            return true;
+                        }
+
+                        $user = Auth::user();
+
+                        return ! ($user instanceof User && $user->hasRole('Kepala Sekolah'));
+                    })
                     ->rows(3)
                     ->columnSpanFull(),
             ]);

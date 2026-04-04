@@ -16,12 +16,12 @@ return new class extends Migration
             $table->foreignId('jenis_surat_id')->constrained('jenis_surats')->restrictOnDelete();
             $table->foreignId('pembuat_id')->constrained('users')->restrictOnDelete();
             $table->foreignId('approver_id')->constrained('users')->restrictOnDelete();
-            $table->string('no_surat')->unique();
+            $table->string('no_surat')->nullable()->unique();
             $table->string('perihal');
-            $table->string('tujuan')->nullable();
             $table->date('tanggal_surat')->nullable();
             $table->enum('status', ['draft', 'booked', 'menunggu_persetujuan', 'disetujui', 'ditolak', 'expired'])->default('draft');
             $table->string('surat_file_path')->nullable();
+            $table->string('released_no_surat')->nullable()->unique();
             $table->string('verification_token')->nullable()->unique();
             $table->text('rejection_note')->nullable();
             $table->json('metadata')->nullable();

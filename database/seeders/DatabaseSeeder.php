@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             //JenisSuratSeeder::class,
             //CounterSuratSeeder::class,
             SekolahSeeder::class,
+            SuratSeeder::class,
         ]);
     }
 }

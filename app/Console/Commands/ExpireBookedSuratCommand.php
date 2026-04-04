@@ -41,8 +41,11 @@ class ExpireBookedSuratCommand extends Command
                             return;
                         }
 
+                        $releasedNumber = $surat->no_surat;
+
                         $surat->update([
                             'status' => Surat::STATUS_EXPIRED,
+                            'released_no_surat' => $releasedNumber,
                         ]);
 
                         AuditLog::create([
@@ -58,7 +61,7 @@ class ExpireBookedSuratCommand extends Command
                         $chatId = $surat->pembuat?->telegram_chat_id;
                         $message = sprintf(
                             "⚠️ Nomor surat *%s* telah dibatalkan otomatis karena tidak ada aktivitas dalam 24 jam.",
-                            $surat->no_surat
+                            $releasedNumber
                         );
 
                         $telegramLog = TelegramLog::create([

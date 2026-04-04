@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +21,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        DatePicker::configureUsing(function (DatePicker $component): void {
+            $component
+                ->displayFormat('d M Y')
+                ->native(false);
+        });
+
+        // Also apply to DateTimePickers if needed
+        DateTimePicker::configureUsing(function (DateTimePicker $component): void {
+            $component
+                ->displayFormat('d M Y')
+                ->native(false);
+        });
     }
 }

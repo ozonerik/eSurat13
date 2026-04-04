@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\CounterSurat;
 use App\Models\JenisSurat;
 use App\Models\Sekolah;
+use App\Models\Surat;
 use Illuminate\Support\Facades\DB;
 
 class SuratNumberService
@@ -31,6 +32,29 @@ class SuratNumberService
         return DB::transaction(function () use ($jenisSurat, $tahun, $kategoriId, $kodeSurat): string {
             $kode = $jenisSurat->kategoriSurat?->kode ?? $jenisSurat->kode;
 
+            // Prioritas tertinggi: pakai nomor yang dilepas dari surat expired.
+            $releasedSurat = Surat::query()
+                ->where('status', Surat::STATUS_EXPIRED)
+                ->where('jenis_surat_id', $jenisSurat->id)
+                ->whereNotNull('released_no_surat')
+                ->where('released_no_surat', 'like', '%/'.$tahun)
+                ->lockForUpdate()
+                ->orderBy('id')
+                ->first();
+
+            if ($releasedSurat) {
+                $releasedNumber = $releasedSurat->released_no_surat;
+
+                $releasedSurat->update([
+                    'released_no_surat' => null,
+                    'no_surat' => null,
+                ]);
+
+                if (filled($releasedNumber)) {
+                    return $releasedNumber;
+                }
+            }
+
             // ── 1. Global counter (kode '000', tahun null) ────────────────────
             $globalCounter = CounterSurat::query()
                 ->whereNull('tahun')
@@ -42,7 +66,7 @@ class SuratNumberService
                 $globalCounter->increment('last_number');
                 $globalCounter->refresh();
 
-                return sprintf('%04d/%s/%s/%d', $globalCounter->last_number, $kode, $kodeSurat, $tahun);
+                return sprintf('%03d/%s/%s/%d', $globalCounter->last_number, $kode, $kodeSurat, $tahun);
             }
 
             // ── 2. Category-scoped counter tanpa tahun ────────────────────────
@@ -57,7 +81,7 @@ class SuratNumberService
                     $yearlessCounter->increment('last_number');
                     $yearlessCounter->refresh();
 
-                    return sprintf('%04d/%s/%s/%d', $yearlessCounter->last_number, $kode, $kodeSurat, $tahun);
+                    return sprintf('%03d/%s/%s/%d', $yearlessCounter->last_number, $kode, $kodeSurat, $tahun);
                 }
             }
 
@@ -86,7 +110,7 @@ class SuratNumberService
             $counter->increment('last_number');
             $counter->refresh();
 
-            return sprintf('%04d/%s/%s/%d', $counter->last_number, $kode, $kodeSurat, $tahun);
+            return sprintf('%03d/%s/%s/%d', $counter->last_number, $kode, $kodeSurat, $tahun);
         });
     }
 }
