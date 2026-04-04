@@ -8,11 +8,14 @@ use App\Filament\Resources\CounterSurats\Pages\ListCounterSurats;
 use App\Filament\Resources\CounterSurats\Schemas\CounterSuratForm;
 use App\Filament\Resources\CounterSurats\Tables\CounterSuratsTable;
 use App\Models\CounterSurat;
+use App\Models\User;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use UnitEnum;
 
 class CounterSuratResource extends Resource
@@ -55,5 +58,32 @@ class CounterSuratResource extends Resource
             'create' => CreateCounterSurat::route('/create'),
             'edit' => EditCounterSurat::route('/{record}/edit'),
         ];
+    }
+
+    public static function canViewAny(): bool
+    {
+        $user = Auth::user();
+
+        return $user instanceof User && $user->hasAnyRole(['Admin', 'Pengelola Surat']);
+    }
+
+    public static function canCreate(): bool
+    {
+        return static::canViewAny();
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return static::canViewAny();
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return static::canViewAny();
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return static::canViewAny();
     }
 }

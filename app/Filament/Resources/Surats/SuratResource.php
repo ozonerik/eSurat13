@@ -21,6 +21,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use UnitEnum;
 
@@ -76,14 +77,22 @@ class SuratResource extends Resource
     public static function getNavigationItems(): array
     {
         $user = Auth::user();
+
+        if (! $user instanceof User) {
+            return [];
+        }
+
         $isAdmin = $user instanceof User && $user->hasRole('Admin');
+        $isPengelola = $user instanceof User && $user->hasRole('Pengelola Surat');
         $isKepalaSekolah = $user instanceof User && $user->hasRole('Kepala Sekolah');
+        $canReadReview = $user->can('surat.review.read');
+        $canViewAllSurat = $isAdmin || $isPengelola;
         $userId = $user?->id;
 
-        $scopedCount = function (string $status) use ($isAdmin, $userId): int {
+        $scopedCount = function (string $status) use ($canViewAllSurat, $userId): int {
             $query = Surat::query()->where('status', $status);
 
-            if ($isAdmin) {
+            if ($canViewAllSurat) {
                 return $query->count();
             }
 
@@ -145,12 +154,16 @@ class SuratResource extends Resource
                 ->isActiveWhen(fn (): bool => original_request()->routeIs("{$base}.surat-expired")),
         ];
 
-        if ($isKepalaSekolah) {
-            $reviewCount = Surat::query()
-                ->where('status', Surat::STATUS_MENUNGGU_PERSETUJUAN)
-                ->where('approver_id', $userId)
-                ->whereNull('metadata->' . Surat::METADATA_VIEWED_BY_APPROVER_STATUSES . '->' . Surat::STATUS_MENUNGGU_PERSETUJUAN)
-                ->count();
+        if ($canReadReview) {
+            $reviewCountQuery = Surat::query()->where('status', Surat::STATUS_MENUNGGU_PERSETUJUAN);
+
+            if ($isKepalaSekolah && ! $canViewAllSurat) {
+                $reviewCountQuery
+                    ->where('approver_id', $userId)
+                    ->whereNull('metadata->' . Surat::METADATA_VIEWED_BY_APPROVER_STATUSES . '->' . Surat::STATUS_MENUNGGU_PERSETUJUAN);
+            }
+
+            $reviewCount = $reviewCountQuery->count();
 
             $items[] = NavigationItem::make('Review Surat')
                 ->group('Transaksi Surat')
@@ -162,5 +175,78 @@ class SuratResource extends Resource
         }
 
         return $items;
+    }
+
+    public static function canViewAny(): bool
+    {
+        $user = Auth::user();
+
+        return $user instanceof User
+            && $user->hasAnyRole([
+                'Admin',
+                'Kepala Sekolah',
+                'Guru',
+                'TU',
+                'Kaprog',
+                'Wakil Kepala Sekolah',
+                'Pengelola Surat',
+            ]);
+    }
+
+    public static function canCreate(): bool
+    {
+        $user = Auth::user();
+
+        return $user instanceof User && $user->can('surat.create');
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        $user = Auth::user();
+
+        if (! $user instanceof User) {
+            return false;
+        }
+
+        /** @var Surat $record */
+        if ((int) $record->pembuat_id === (int) $user->id) {
+            return true;
+        }
+
+        if (! $user->can('surat.review.update') || $record->status !== Surat::STATUS_MENUNGGU_PERSETUJUAN) {
+            return false;
+        }
+
+        if ($user->hasRole('Admin')) {
+            return true;
+        }
+
+        return $user->hasRole('Kepala Sekolah') && ((int) $record->approver_id === (int) $user->id);
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        $user = Auth::user();
+
+        if (! $user instanceof User) {
+            return false;
+        }
+
+        /** @var Surat $record */
+        if (filled($record->no_surat)) {
+            return false;
+        }
+
+        if ($user->can('surat.delete.null-number.all')) {
+            return true;
+        }
+
+        return $user->can('surat.delete.null-number.own')
+            && ((int) $record->pembuat_id === (int) $user->id);
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return false;
     }
 }

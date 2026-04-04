@@ -13,6 +13,8 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use UnitEnum;
 
 class KepalaSekolahResource extends Resource
@@ -66,7 +68,19 @@ class KepalaSekolahResource extends Resource
         return false;
     }
 
-    public static function canDelete($record): bool
+    public static function canViewAny(): bool
+    {
+        $user = Auth::user();
+
+        return $user instanceof User && $user->hasAnyRole(['Admin', 'Kepala Sekolah', 'TU']);
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return static::canViewAny();
+    }
+
+    public static function canDelete(Model $record): bool
     {
         return false;
     }

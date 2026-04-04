@@ -19,15 +19,46 @@ class RolePermissionSeeder extends Seeder
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         $permissions = [
-            'master.jenis-surat.manage',
-            'master.counter-surat.manage',
+            'audit-log.read',
+            'telegram-log.read',
+            'sekolah.read',
+            'sekolah.update',
+            'kepala-sekolah.read',
+            'kepala-sekolah.update',
+            'kategori-surat.create',
+            'kategori-surat.read',
+            'kategori-surat.update',
+            'kategori-surat.delete',
+            'jenis-surat.create',
+            'jenis-surat.read',
+            'jenis-surat.update',
+            'jenis-surat.delete',
+            'counter-surat.create',
+            'counter-surat.read',
+            'counter-surat.update',
+            'counter-surat.delete',
             'surat.create',
-            'surat.review',
-            'surat.approve-reject',
-            'surat.archive.view',
-            'audit-log.view',
-            'telegram-log.view',
-            'telegram-chat-id.manage',
+            'surat.draft.read',
+            'surat.dikirim.read',
+            'surat.disetujui.read',
+            'surat.ditolak.read',
+            'surat.expired.read',
+            'surat.review.read',
+            'surat.review.update',
+            'surat.delete.null-number.own',
+            'surat.delete.null-number.all',
+            'user.create',
+            'user.read',
+            'user.update',
+            'user.delete',
+            'role.create',
+            'role.read',
+            'role.update',
+            'role.delete',
+            'permission.create',
+            'permission.read',
+            'permission.update',
+            'permission.delete',
         ];
 
         foreach ($permissions as $permissionName) {
@@ -43,35 +74,96 @@ class RolePermissionSeeder extends Seeder
         $pengelolaSuratRole = Role::firstOrCreate(['name' => 'Pengelola Surat', 'guard_name' => 'web']);
 
         $adminRole->syncPermissions($permissions);
+
+        $kepalaSekolahRole->syncPermissions([
+            'sekolah.read',
+            'sekolah.update',
+            'kepala-sekolah.read',
+            'kepala-sekolah.update',
+            'surat.create',
+            'surat.draft.read',
+            'surat.dikirim.read',
+            'surat.disetujui.read',
+            'surat.ditolak.read',
+            'surat.expired.read',
+            'surat.review.read',
+            'surat.review.update',
+            'surat.delete.null-number.own',
+        ]);
+
         $guruRole->syncPermissions([
             'surat.create',
-            'surat.archive.view',
+            'surat.draft.read',
+            'surat.dikirim.read',
+            'surat.disetujui.read',
+            'surat.ditolak.read',
+            'surat.expired.read',
+            'surat.delete.null-number.own',
         ]);
-        $kepalaSekolahRole->syncPermissions([
-            'surat.review',
-            'surat.approve-reject',
-            'surat.archive.view',
-        ]);
-        $wakasekRole->syncPermissions([
-            'surat.review',
-            'surat.approve-reject',
-            'surat.archive.view',
-        ]);
-        $kaprogRole->syncPermissions([
-            'surat.create',
-            'surat.review',
-            'surat.archive.view',
-        ]);
+
         $tuRole->syncPermissions([
-            'master.jenis-surat.manage',
-            'master.counter-surat.manage',
-            'telegram-chat-id.manage',
-            'surat.archive.view',
-        ]);
-        $pengelolaSuratRole->syncPermissions([
+            'sekolah.read',
+            'sekolah.update',
+            'kepala-sekolah.read',
+            'kepala-sekolah.update',
             'surat.create',
-            'surat.review',
-            'surat.archive.view',
+            'surat.draft.read',
+            'surat.dikirim.read',
+            'surat.disetujui.read',
+            'surat.ditolak.read',
+            'surat.expired.read',
+            'surat.delete.null-number.own',
+        ]);
+
+        $kaprogRole->syncPermissions([
+            'jenis-surat.create',
+            'jenis-surat.read',
+            'jenis-surat.update',
+            'jenis-surat.delete',
+            'surat.create',
+            'surat.draft.read',
+            'surat.dikirim.read',
+            'surat.disetujui.read',
+            'surat.ditolak.read',
+            'surat.expired.read',
+            'surat.delete.null-number.own',
+        ]);
+
+        $wakasekRole->syncPermissions([
+            'jenis-surat.create',
+            'jenis-surat.read',
+            'jenis-surat.update',
+            'jenis-surat.delete',
+            'surat.create',
+            'surat.draft.read',
+            'surat.dikirim.read',
+            'surat.disetujui.read',
+            'surat.ditolak.read',
+            'surat.expired.read',
+            'surat.delete.null-number.own',
+        ]);
+
+        $pengelolaSuratRole->syncPermissions([
+            'kategori-surat.create',
+            'kategori-surat.read',
+            'kategori-surat.update',
+            'kategori-surat.delete',
+            'jenis-surat.create',
+            'jenis-surat.read',
+            'jenis-surat.update',
+            'jenis-surat.delete',
+            'counter-surat.create',
+            'counter-surat.read',
+            'counter-surat.update',
+            'counter-surat.delete',
+            'surat.create',
+            'surat.draft.read',
+            'surat.dikirim.read',
+            'surat.disetujui.read',
+            'surat.ditolak.read',
+            'surat.expired.read',
+            'surat.review.read',
+            'surat.delete.null-number.all',
         ]);
 
         Role::whereIn('name', ['Pembuat Surat', 'Pimpinan', 'Viewer Arsip'])->delete();

@@ -8,11 +8,14 @@ use App\Filament\Resources\KategoriSurats\Pages\ListKategoriSurats;
 use App\Filament\Resources\KategoriSurats\Schemas\KategoriSuratForm;
 use App\Filament\Resources\KategoriSurats\Tables\KategoriSuratsTable;
 use App\Models\KategoriSurat;
+use App\Models\User;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use UnitEnum;
 
 class KategoriSuratResource extends Resource
@@ -55,5 +58,32 @@ class KategoriSuratResource extends Resource
             'create' => CreateKategoriSurat::route('/create'),
             'edit' => EditKategoriSurat::route('/{record}/edit'),
         ];
+    }
+
+    public static function canViewAny(): bool
+    {
+        $user = Auth::user();
+
+        return $user instanceof User && $user->hasAnyRole(['Admin', 'Pengelola Surat']);
+    }
+
+    public static function canCreate(): bool
+    {
+        return static::canViewAny();
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return static::canViewAny();
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return static::canViewAny();
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return static::canViewAny();
     }
 }

@@ -21,14 +21,19 @@ class ListReviewSurat extends ListRecords
         parent::authorizeAccess();
 
         $user = Auth::user();
-        abort_unless($user instanceof User && $user->hasRole('Kepala Sekolah'), 403);
+        abort_unless($user instanceof User && $user->can('surat.review.read'), 403);
     }
 
     protected function getTableQuery(): Builder|Relation|null
     {
-        return Surat::query()
-            ->where('status', Surat::STATUS_MENUNGGU_PERSETUJUAN)
-            ->where('approver_id', Auth::id());
+        $user = Auth::user();
+        $query = Surat::query()->where('status', Surat::STATUS_MENUNGGU_PERSETUJUAN);
+
+        if ($user instanceof User && $user->hasAnyRole(['Admin', 'Pengelola Surat'])) {
+            return $query;
+        }
+
+        return $query->where('approver_id', Auth::id());
     }
 
     protected function getHeaderActions(): array

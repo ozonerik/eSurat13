@@ -71,7 +71,15 @@ class EditSurat extends EditRecord
     {
         $user = Auth::user();
 
-        if (! $user instanceof User || ! $user->hasRole('Kepala Sekolah')) {
+        if (! $user instanceof User || ! $user->can('surat.review.update')) {
+            return false;
+        }
+
+        if ($user->hasRole('Admin')) {
+            return $this->record->status === Surat::STATUS_MENUNGGU_PERSETUJUAN;
+        }
+
+        if (! $user->hasRole('Kepala Sekolah')) {
             return false;
         }
 

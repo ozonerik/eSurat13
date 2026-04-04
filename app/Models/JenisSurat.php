@@ -13,6 +13,7 @@ class JenisSurat extends Model
     use HasFactory;
 
     protected $fillable = [
+        'created_by',
         'kategori_surat_id',
         'kode',
         'nama',
@@ -33,6 +34,11 @@ class JenisSurat extends Model
     public function counters(): HasMany
     {
         return $this->hasMany(CounterSurat::class);
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function kategoriSurat(): BelongsTo

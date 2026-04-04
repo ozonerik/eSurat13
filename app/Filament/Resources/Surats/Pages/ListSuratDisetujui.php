@@ -19,11 +19,11 @@ class ListSuratDisetujui extends ListRecords
     protected function getTableQuery(): Builder|Relation|null
     {
         $user = Auth::user();
-        $isAdmin = $user instanceof User && $user->hasRole('Admin');
+        $canViewAll = $user instanceof User && $user->hasAnyRole(['Admin', 'Pengelola Surat']);
 
         return Surat::query()
             ->where('status', Surat::STATUS_DISETUJUI)
-            ->when(! $isAdmin, fn (Builder $q) => $q->where('pembuat_id', Auth::id()));
+            ->when(! $canViewAll, fn (Builder $q) => $q->where('pembuat_id', Auth::id()));
     }
 
     protected function getHeaderActions(): array

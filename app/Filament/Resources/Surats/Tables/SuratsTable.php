@@ -5,8 +5,7 @@ namespace App\Filament\Resources\Surats\Tables;
 use App\Models\KategoriSurat;
 use App\Models\JenisSurat;
 use App\Models\Surat;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -80,12 +79,9 @@ class SuratsTable
             ])
             ->recordActions([
                 EditAction::make(),
+                DeleteAction::make(),
             ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->toolbarActions([]);
     }
 
     protected static function resolveTemplateUrl(?int $jenisSuratId): ?string
