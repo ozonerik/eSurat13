@@ -13,44 +13,40 @@ class JenisSuratSeeder extends Seeder
      */
     public function run(): void
     {
-        $items = [
-            [
-                'kategori_kode' => 'ADM',
-                'kode' => 'KET',
-                'nama' => 'Surat Keterangan',
-                'deskripsi' => 'Template surat keterangan umum.',
-            ],
-            [
-                'kategori_kode' => 'ADM',
-                'kode' => 'UND',
-                'nama' => 'Surat Undangan',
-                'deskripsi' => 'Template surat undangan resmi.',
-            ],
-            [
-                'kategori_kode' => 'AKD',
-                'kode' => 'SK',
-                'nama' => 'Surat Keputusan',
-                'deskripsi' => 'Template surat keputusan internal sekolah.',
-            ],
-            [
-                'kategori_kode' => 'KPG',
-                'kode' => 'TGS',
-                'nama' => 'Surat Tugas',
-                'deskripsi' => 'Template surat tugas guru/staf.',
-            ],
+        $kategoriCodes = [
+            '421',
+            '421.3',
+            '421.5',
+            '421.6',
+            '421.7',
+            '422.7',
+            '422.6',
+            '800',
+            '820',
+            '830',
+            '900',
+            '005',
+            '045',
+            '027',
         ];
 
-        foreach ($items as $item) {
-            $kategoriId = KategoriSurat::query()
-                ->where('kode', $item['kategori_kode'])
-                ->value('id');
+        foreach ($kategoriCodes as $kategoriCode) {
+            $kategori = KategoriSurat::query()
+                ->where('kode', $kategoriCode)
+                ->first();
+
+            if (! $kategori) {
+                continue;
+            }
+
+            $normalizedCode = preg_replace('/[^A-Za-z0-9]/', '', $kategori->kode);
 
             JenisSurat::updateOrCreate(
-                ['kode' => $item['kode']],
+                ['kode' => 'JS'.$normalizedCode],
                 [
-                    'kategori_surat_id' => $kategoriId,
-                    'nama' => $item['nama'],
-                    'deskripsi' => $item['deskripsi'],
+                    'kategori_surat_id' => $kategori->id,
+                    'nama' => 'Jenis Surat '.$kategori->nama,
+                    'deskripsi' => 'Template default untuk kategori '.$kategori->nama.'.',
                     'template_path' => null,
                     'requires_approval' => true,
                     'is_active' => true,

@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             KategoriSuratSeeder::class,
             JenisSuratSeeder::class,
+            CounterSuratSeeder::class,
             SekolahSeeder::class,
         ]);
     }
