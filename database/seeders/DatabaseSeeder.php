@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             JenisSuratSeeder::class,
             CounterSuratSeeder::class,
             SekolahSeeder::class,
+            KepalaSekolahSeeder::class,
         ]);
     }
 }
