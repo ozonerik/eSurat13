@@ -20,11 +20,8 @@ class KepalaSekolahFactory extends Factory
         return [
             'nip' => fake()->unique()->numerify('##################'),
             'nama_kepala_sekolah' => fake()->name(),
-            'pangkat_golongan' => fake()->randomElement([
-                'Pembina, IV/a',
-                'Pembina Tk.I, IV/b',
-                'Pembina Utama Muda, IV/c',
-            ]),
+            'pangkat_golongan' => null,
+            'telp' => null,
             'tanda_tangan' => null,
             'is_active' => true,
         ];

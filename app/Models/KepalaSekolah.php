@@ -22,6 +22,7 @@ class KepalaSekolah extends Model
     protected function casts(): array
     {
         return [
+            'nip' => 'string',
             'is_active' => 'boolean',
         ];
     }

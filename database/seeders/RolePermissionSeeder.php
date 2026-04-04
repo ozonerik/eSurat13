@@ -57,6 +57,7 @@ class RolePermissionSeeder extends Seeder
             ['email' => env('ESURAT_ADMIN_EMAIL', 'admin@esurat.local')],
             [
                 'name' => env('ESURAT_ADMIN_NAME', 'Administrator eSurat'),
+                'nip' => env('ESURAT_ADMIN_NIP', '000000000000000001'),
                 'password' => Hash::make(env('ESURAT_ADMIN_PASSWORD', 'password')),
                 'telegram_chat_id' => env('ESURAT_ADMIN_CHAT_ID'),
                 'email_verified_at' => now(),
