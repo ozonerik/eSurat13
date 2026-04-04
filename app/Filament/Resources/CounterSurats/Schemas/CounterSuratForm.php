@@ -21,8 +21,7 @@ class CounterSuratForm
                 TextInput::make('tahun')
                     ->numeric()
                     ->minValue(2000)
-                    ->maxValue(2100)
-                    ->required(),
+                    ->maxValue(2100),
                 TextInput::make('last_number')
                     ->numeric()
                     ->minValue(0)

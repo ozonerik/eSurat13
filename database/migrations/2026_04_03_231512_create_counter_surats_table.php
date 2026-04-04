@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('counter_surats', function (Blueprint $table) {
             $table->id();
             $table->foreignId('jenis_surat_id')->constrained('jenis_surats')->cascadeOnDelete();
-            $table->unsignedSmallInteger('tahun');
+            $table->unsignedSmallInteger('tahun')->nullable();
             $table->unsignedInteger('last_number')->default(0);
             $table->timestamps();
 
