@@ -77,11 +77,11 @@ class RolePermissionSeeder extends Seeder
         Role::whereIn('name', ['Pembuat Surat', 'Pimpinan', 'Viewer Arsip'])->delete();
 
         $admin = User::firstOrCreate(
-            ['email' => env('ESURAT_ADMIN_EMAIL', 'admin@esurat.local')],
+            ['email' => env('ESURAT_ADMIN_EMAIL', 'admin@test.id')],
             [
                 'name' => env('ESURAT_ADMIN_NAME', 'Administrator eSurat'),
-                'nip' => env('ESURAT_ADMIN_NIP', '000000000000000001'),
-                'password' => Hash::make(env('ESURAT_ADMIN_PASSWORD', 'password')),
+                'nip' => env('ESURAT_ADMIN_NIP',null),
+                'password' => Hash::make(env('ESURAT_ADMIN_PASSWORD', 'admin')),
                 'telegram_chat_id' => env('ESURAT_ADMIN_CHAT_ID'),
                 'email_verified_at' => now(),
             ]

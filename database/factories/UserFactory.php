@@ -26,7 +26,7 @@ class UserFactory extends Factory
     {
         return [
             'name' => fake()->name(),
-            'nip' => fake()->unique()->numerify('##################'),
+            'nip' => null,
             'email' => fake()->unique()->safeEmail(),
             'telegram_chat_id' => (string) fake()->unique()->numberBetween(100000000, 999999999),
             'email_verified_at' => now(),
