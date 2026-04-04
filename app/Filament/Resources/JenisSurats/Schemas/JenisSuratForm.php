@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\JenisSurats\Schemas;
 
+use App\Models\KategoriSurat;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
@@ -17,7 +18,10 @@ class JenisSuratForm
             ->components([
                 Select::make('kategori_surat_id')
                     ->relationship('kategoriSurat', 'nama')
-                    ->searchable()
+                    ->getOptionLabelFromRecordUsing(
+                        static fn (KategoriSurat $record): string => "{$record->kode} - {$record->nama}"
+                    )
+                    ->searchable(['kode', 'nama'])
                     ->preload(),
                 TextInput::make('kode')
                     ->required()

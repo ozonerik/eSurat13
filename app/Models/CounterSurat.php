@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,6 +25,13 @@ class CounterSurat extends Model
             'tahun' => 'integer',
             'last_number' => 'integer',
         ];
+    }
+
+    protected function tahun(): Attribute
+    {
+        return Attribute::make(
+            set: static fn (mixed $value): ?int => blank($value) ? null : (int) $value,
+        );
     }
 
     public function jenisSurat(): BelongsTo
