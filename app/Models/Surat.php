@@ -20,6 +20,9 @@ class Surat extends Model
     public const STATUS_DITOLAK = 'ditolak';
     public const STATUS_EXPIRED = 'expired';
 
+    public const METADATA_VIEWED_BY_PEMBUAT_STATUSES = 'viewed_by_pembuat_statuses';
+    public const METADATA_VIEWED_BY_APPROVER_STATUSES = 'viewed_by_approver_statuses';
+
     public const STATUSES = [
         self::STATUS_DRAFT,
         self::STATUS_BOOKED,
@@ -60,6 +63,21 @@ class Surat extends Model
         });
 
         static::saving(function (Surat $surat): void {
+            if ($surat->isDirty('status')) {
+                $surat->clearViewedFlagsForStatus((string) $surat->status);
+            }
+
+            if (
+                $surat->exists
+                && $surat->isDirty('surat_file_path')
+                && ! $surat->isDirty('status')
+                && filled($surat->surat_file_path)
+            ) {
+                // Revisi file pada status yang sama dianggap "belum dilihat" lagi oleh pembuat.
+                $surat->clearPembuatViewedFlagForStatus((string) $surat->status);
+                $surat->clearApproverViewedFlagForStatus((string) $surat->status);
+            }
+
             if ($surat->status === self::STATUS_DISETUJUI) {
                 if (blank($surat->verification_token)) {
                     $surat->verification_token = self::generateUniqueVerificationToken($surat->id);
@@ -69,6 +87,16 @@ class Surat extends Model
             }
 
             if ($surat->status === self::STATUS_DITOLAK) {
+                if (
+                    $surat->exists
+                    && $surat->isDirty('status')
+                    && filled($surat->no_surat)
+                    && blank($surat->released_no_surat)
+                ) {
+                    // Surat ditolak melepas nomor agar bisa dipakai ulang.
+                    $surat->released_no_surat = $surat->no_surat;
+                }
+
                 return;
             }
 
@@ -107,6 +135,73 @@ class Surat extends Model
         } while ($exists);
 
         return $token;
+    }
+
+    public function markViewedByPembuatForCurrentStatus(): void
+    {
+        if (blank($this->status)) {
+            return;
+        }
+
+        $metadata = $this->metadata ?? [];
+        $metadata[self::METADATA_VIEWED_BY_PEMBUAT_STATUSES] ??= [];
+        $metadata[self::METADATA_VIEWED_BY_PEMBUAT_STATUSES][$this->status] = now()->toDateTimeString();
+
+        $this->updateQuietly([
+            'metadata' => $metadata,
+        ]);
+    }
+
+    public function markViewedByApproverForCurrentStatus(): void
+    {
+        if (blank($this->status)) {
+            return;
+        }
+
+        $metadata = $this->metadata ?? [];
+        $metadata[self::METADATA_VIEWED_BY_APPROVER_STATUSES] ??= [];
+        $metadata[self::METADATA_VIEWED_BY_APPROVER_STATUSES][$this->status] = now()->toDateTimeString();
+
+        $this->updateQuietly([
+            'metadata' => $metadata,
+        ]);
+    }
+
+    protected function clearViewedFlagsForStatus(string $status): void
+    {
+        $metadata = $this->metadata ?? [];
+
+        if (isset($metadata[self::METADATA_VIEWED_BY_PEMBUAT_STATUSES][$status])) {
+            unset($metadata[self::METADATA_VIEWED_BY_PEMBUAT_STATUSES][$status]);
+        }
+
+        if (isset($metadata[self::METADATA_VIEWED_BY_APPROVER_STATUSES][$status])) {
+            unset($metadata[self::METADATA_VIEWED_BY_APPROVER_STATUSES][$status]);
+        }
+
+        $this->metadata = $metadata;
+    }
+
+    protected function clearPembuatViewedFlagForStatus(string $status): void
+    {
+        $metadata = $this->metadata ?? [];
+
+        if (isset($metadata[self::METADATA_VIEWED_BY_PEMBUAT_STATUSES][$status])) {
+            unset($metadata[self::METADATA_VIEWED_BY_PEMBUAT_STATUSES][$status]);
+        }
+
+        $this->metadata = $metadata;
+    }
+
+    protected function clearApproverViewedFlagForStatus(string $status): void
+    {
+        $metadata = $this->metadata ?? [];
+
+        if (isset($metadata[self::METADATA_VIEWED_BY_APPROVER_STATUSES][$status])) {
+            unset($metadata[self::METADATA_VIEWED_BY_APPROVER_STATUSES][$status]);
+        }
+
+        $this->metadata = $metadata;
     }
 
     public function jenisSurat(): BelongsTo

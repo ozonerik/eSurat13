@@ -32,9 +32,9 @@ class SuratNumberService
         return DB::transaction(function () use ($jenisSurat, $tahun, $kategoriId, $kodeSurat): string {
             $kode = $jenisSurat->kategoriSurat?->kode ?? $jenisSurat->kode;
 
-            // Prioritas tertinggi: pakai nomor yang dilepas dari surat expired.
+            // Prioritas tertinggi: pakai nomor yang dilepas dari surat expired/ditolak.
             $releasedSurat = Surat::query()
-                ->where('status', Surat::STATUS_EXPIRED)
+                ->whereIn('status', [Surat::STATUS_EXPIRED, Surat::STATUS_DITOLAK])
                 ->where('jenis_surat_id', $jenisSurat->id)
                 ->whereNotNull('released_no_surat')
                 ->where('released_no_surat', 'like', '%/'.$tahun)

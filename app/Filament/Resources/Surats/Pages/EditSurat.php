@@ -14,6 +14,25 @@ class EditSurat extends EditRecord
 {
     protected static string $resource = SuratResource::class;
 
+    public function mount(int|string $record): void
+    {
+        parent::mount($record);
+
+        $user = Auth::user();
+
+        if (! $user instanceof User) {
+            return;
+        }
+
+        if ((int) $this->record->pembuat_id === (int) $user->id) {
+            $this->record->markViewedByPembuatForCurrentStatus();
+        }
+
+        if ((int) $this->record->approver_id === (int) $user->id) {
+            $this->record->markViewedByApproverForCurrentStatus();
+        }
+    }
+
     protected function getHeaderActions(): array
     {
         return [

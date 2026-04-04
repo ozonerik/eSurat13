@@ -81,9 +81,15 @@ class SuratResource extends Resource
         $userId = $user?->id;
 
         $scopedCount = function (string $status) use ($isAdmin, $userId): int {
-            return Surat::query()
-                ->where('status', $status)
-                ->when(! $isAdmin, fn ($q) => $q->where('pembuat_id', $userId))
+            $query = Surat::query()->where('status', $status);
+
+            if ($isAdmin) {
+                return $query->count();
+            }
+
+            return $query
+                ->where('pembuat_id', $userId)
+                ->whereNull("metadata->" . Surat::METADATA_VIEWED_BY_PEMBUAT_STATUSES . "->{$status}")
                 ->count();
         };
 
@@ -143,6 +149,7 @@ class SuratResource extends Resource
             $reviewCount = Surat::query()
                 ->where('status', Surat::STATUS_MENUNGGU_PERSETUJUAN)
                 ->where('approver_id', $userId)
+                ->whereNull('metadata->' . Surat::METADATA_VIEWED_BY_APPROVER_STATUSES . '->' . Surat::STATUS_MENUNGGU_PERSETUJUAN)
                 ->count();
 
             $items[] = NavigationItem::make('Review Surat')
