@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\Sekolahs\Pages;
 
 use App\Filament\Resources\Sekolahs\SekolahResource;
-use Filament\Resources\Pages\CreateRecord;
+use App\Filament\Resources\Pages\CreateRecordRedirectIndex as CreateRecord;
 
 class CreateSekolah extends CreateRecord
 {

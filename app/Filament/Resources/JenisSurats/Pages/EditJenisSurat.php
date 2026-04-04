@@ -4,7 +4,7 @@ namespace App\Filament\Resources\JenisSurats\Pages;
 
 use App\Filament\Resources\JenisSurats\JenisSuratResource;
 use Filament\Actions\DeleteAction;
-use Filament\Resources\Pages\EditRecord;
+use App\Filament\Resources\Pages\EditRecordRedirectIndex as EditRecord;
 
 class EditJenisSurat extends EditRecord
 {

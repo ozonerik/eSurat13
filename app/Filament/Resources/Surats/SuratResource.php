@@ -21,7 +21,7 @@ class SuratResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedInbox;
 
-    protected static ?string $navigationLabel = 'Surat';
+    protected static ?string $navigationLabel = 'Buat Surat';
 
     protected static ?string $modelLabel = 'Surat';
 

@@ -3,8 +3,7 @@
 namespace App\Filament\Resources\KepalaSekolahs\Pages;
 
 use App\Filament\Resources\KepalaSekolahs\KepalaSekolahResource;
-use Filament\Actions\DeleteAction;
-use Filament\Resources\Pages\EditRecord;
+use App\Filament\Resources\Pages\EditRecordRedirectIndex as EditRecord;
 
 class EditKepalaSekolah extends EditRecord
 {
@@ -12,8 +11,6 @@ class EditKepalaSekolah extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        return [
-            DeleteAction::make(),
-        ];
+        return [];
     }
 }

@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\Permissions\Pages;
 
 use App\Filament\Resources\Permissions\PermissionResource;
-use Filament\Resources\Pages\CreateRecord;
+use App\Filament\Resources\Pages\CreateRecordRedirectIndex as CreateRecord;
 
 class CreatePermission extends CreateRecord
 {

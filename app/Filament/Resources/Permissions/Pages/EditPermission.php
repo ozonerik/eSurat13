@@ -4,7 +4,7 @@ namespace App\Filament\Resources\Permissions\Pages;
 
 use App\Filament\Resources\Permissions\PermissionResource;
 use Filament\Actions\DeleteAction;
-use Filament\Resources\Pages\EditRecord;
+use App\Filament\Resources\Pages\EditRecordRedirectIndex as EditRecord;
 
 class EditPermission extends EditRecord
 {

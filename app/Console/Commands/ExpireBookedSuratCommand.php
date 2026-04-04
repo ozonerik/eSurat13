@@ -12,7 +12,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
 #[Signature('surat:expire-bookings')]
-#[Description('Expire booked surat yang melewati batas 24 jam tanpa upload draft')]
+#[Description('Expire booked surat yang melewati batas 24 jam tanpa upload surat')]
 class ExpireBookedSuratCommand extends Command
 {
     /**
@@ -25,8 +25,8 @@ class ExpireBookedSuratCommand extends Command
         Surat::query()
             ->with('pembuat')
             ->where('status', Surat::STATUS_BOOKED)
-            ->whereNotNull('booking_expires_at')
-            ->where('booking_expires_at', '<=', now())
+            ->whereNull('surat_file_path')
+            ->where('created_at', '<=', now()->subDay())
             ->orderBy('id')
             ->chunkById(100, function ($surats) use (&$expiredCount): void {
                 foreach ($surats as $surat) {
@@ -35,8 +35,8 @@ class ExpireBookedSuratCommand extends Command
 
                         if (
                             $surat->status !== Surat::STATUS_BOOKED
-                            || ! $surat->booking_expires_at
-                            || $surat->booking_expires_at->isFuture()
+                            || filled($surat->surat_file_path)
+                            || $surat->created_at?->copy()->addDay()->isFuture()
                         ) {
                             return;
                         }

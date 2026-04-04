@@ -4,7 +4,7 @@ namespace App\Filament\Resources\CounterSurats\Pages;
 
 use App\Filament\Resources\CounterSurats\CounterSuratResource;
 use Filament\Actions\DeleteAction;
-use Filament\Resources\Pages\EditRecord;
+use App\Filament\Resources\Pages\EditRecordRedirectIndex as EditRecord;
 
 class EditCounterSurat extends EditRecord
 {

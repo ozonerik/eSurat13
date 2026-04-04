@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\KepalaSekolahs\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -15,15 +13,22 @@ class KepalaSekolahsTable
     {
         return $table
             ->columns([
-                TextColumn::make('nip')
+                TextColumn::make('name')
+                    ->label('Nama')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('nama_kepala_sekolah')
+                TextColumn::make('nip')
+                    ->label('NIP')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('pangkat_golongan')
+                    ->label('Pangkat/Golongan')
                     ->searchable(),
+                TextColumn::make('email')
+                    ->searchable()
+                    ->sortable(),
                 IconColumn::make('is_active')
+                    ->label('Aktif')
                     ->boolean(),
                 TextColumn::make('updated_at')
                     ->dateTime('d M Y H:i')
@@ -35,10 +40,6 @@ class KepalaSekolahsTable
             ->recordActions([
                 EditAction::make(),
             ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->toolbarActions([]);
     }
 }

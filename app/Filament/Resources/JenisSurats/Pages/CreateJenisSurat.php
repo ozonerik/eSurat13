@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\JenisSurats\Pages;
 
 use App\Filament\Resources\JenisSurats\JenisSuratResource;
-use Filament\Resources\Pages\CreateRecord;
+use App\Filament\Resources\Pages\CreateRecordRedirectIndex as CreateRecord;
 
 class CreateJenisSurat extends CreateRecord
 {

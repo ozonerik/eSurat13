@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Surats\Tables;
 
 use App\Models\KategoriSurat;
+use App\Models\Surat;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -10,6 +11,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
 
 class SuratsTable
 {
@@ -24,8 +26,17 @@ class SuratsTable
                     ->label('Jenis Surat')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('jenisSurat.template_path')
+                    ->label('Template')
+                    ->state(fn (Surat $record): string => filled($record->jenisSurat?->template_path) ? 'Download' : '-')
+                    ->url(fn (Surat $record): ?string => filled($record->jenisSurat?->template_path) ? Storage::url($record->jenisSurat->template_path) : null)
+                    ->openUrlInNewTab(),
                 TextColumn::make('pembuat.name')
                     ->label('Pembuat')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('approver.name')
+                    ->label('Approver')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('status')

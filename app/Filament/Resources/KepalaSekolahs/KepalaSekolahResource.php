@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\KepalaSekolahs;
 
-use App\Filament\Resources\KepalaSekolahs\Pages\CreateKepalaSekolah;
 use App\Filament\Resources\KepalaSekolahs\Pages\EditKepalaSekolah;
 use App\Filament\Resources\KepalaSekolahs\Pages\ListKepalaSekolahs;
 use App\Filament\Resources\KepalaSekolahs\Schemas\KepalaSekolahForm;
 use App\Filament\Resources\KepalaSekolahs\Tables\KepalaSekolahsTable;
-use App\Models\KepalaSekolah;
+use App\Models\User;
 use BackedEnum;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -17,7 +17,7 @@ use UnitEnum;
 
 class KepalaSekolahResource extends Resource
 {
-    protected static ?string $model = KepalaSekolah::class;
+    protected static ?string $model = User::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
 
@@ -52,8 +52,27 @@ class KepalaSekolahResource extends Resource
     {
         return [
             'index' => ListKepalaSekolahs::route('/'),
-            'create' => CreateKepalaSekolah::route('/create'),
             'edit' => EditKepalaSekolah::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->whereHas('roles', fn (Builder $query): Builder => $query->where('name', 'Kepala Sekolah'));
+    }
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
+    public static function canDelete($record): bool
+    {
+        return false;
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return false;
     }
 }

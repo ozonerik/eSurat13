@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\Sekolahs\Pages;
 
 use App\Filament\Resources\Sekolahs\SekolahResource;
-use Filament\Resources\Pages\EditRecord;
+use App\Filament\Resources\Pages\EditRecordRedirectIndex as EditRecord;
 
 class EditSekolah extends EditRecord
 {

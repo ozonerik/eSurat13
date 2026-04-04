@@ -6,7 +6,6 @@ use App\Models\JenisSurat;
 use App\Models\Surat;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Surat>
@@ -31,14 +30,8 @@ class SuratFactory extends Factory
             'perihal' => fake()->sentence(4),
             'tujuan' => fake()->company(),
             'tanggal_surat' => fake()->dateTimeBetween('-1 month', 'now')->format('Y-m-d'),
-            'status' => Surat::STATUS_DRAFT,
-            'booked_at' => now(),
-            'booking_expires_at' => now()->addDay(),
-            'draft_uploaded_at' => null,
-            'approved_at' => null,
-            'rejected_at' => null,
-            'draft_file_path' => 'surat/draft/'.Str::uuid().'.pdf',
-            'final_file_path' => null,
+            'status' => Surat::STATUS_BOOKED,
+            'surat_file_path' => null,
             'verification_token' => null,
             'rejection_note' => null,
             'metadata' => ['source' => 'factory'],

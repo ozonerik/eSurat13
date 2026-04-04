@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\KategoriSurats\Pages;
 
 use App\Filament\Resources\KategoriSurats\KategoriSuratResource;
-use Filament\Resources\Pages\CreateRecord;
+use App\Filament\Resources\Pages\CreateRecordRedirectIndex as CreateRecord;
 
 class CreateKategoriSurat extends CreateRecord
 {

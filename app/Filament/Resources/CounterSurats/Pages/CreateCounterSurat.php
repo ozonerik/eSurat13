@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\CounterSurats\Pages;
 
 use App\Filament\Resources\CounterSurats\CounterSuratResource;
-use Filament\Resources\Pages\CreateRecord;
+use App\Filament\Resources\Pages\CreateRecordRedirectIndex as CreateRecord;
 
 class CreateCounterSurat extends CreateRecord
 {

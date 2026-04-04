@@ -4,7 +4,7 @@ namespace App\Filament\Resources\TelegramLogs\Pages;
 
 use App\Filament\Resources\TelegramLogs\TelegramLogResource;
 use Filament\Actions\DeleteAction;
-use Filament\Resources\Pages\EditRecord;
+use App\Filament\Resources\Pages\EditRecordRedirectIndex as EditRecord;
 
 class EditTelegramLog extends EditRecord
 {

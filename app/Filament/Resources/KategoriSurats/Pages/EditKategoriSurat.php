@@ -4,7 +4,7 @@ namespace App\Filament\Resources\KategoriSurats\Pages;
 
 use App\Filament\Resources\KategoriSurats\KategoriSuratResource;
 use Filament\Actions\DeleteAction;
-use Filament\Resources\Pages\EditRecord;
+use App\Filament\Resources\Pages\EditRecordRedirectIndex as EditRecord;
 
 class EditKategoriSurat extends EditRecord
 {
