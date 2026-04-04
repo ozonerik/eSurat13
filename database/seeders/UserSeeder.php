@@ -14,21 +14,35 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $user=User::updateOrCreate(
-            ['nip' => '197006222000121001'],
-            [
-                'name' => 'Taufik Rohmanuddin, S.Pd., M.Eng',
-                'pangkat_golongan' => 'Pembina Tk.I, IV/b',
-                'telp' => null,
-                'tanda_tangan' => null,
-                'is_active' => true,
-                'email' => 'kepsek@test.id',
-                'telegram_chat_id' => (string) fake()->unique()->numberBetween(100000000, 999999999),
-                'email_verified_at' => now(),
-                'password' => Hash::make('kepsek'),
-                'remember_token' => Str::random(10),
-            ],
-        );
-        $user->assignRole('Kepala Sekolah');
+        $roleSeedMap = [
+            'Kepala Sekolah' => 'kepsek',
+            'Guru' => 'guru',
+            'TU' => 'tu',
+            'Kaprog' => 'kaprog',
+            'Wakil Kepala Sekolah' => 'wakasek',
+            'Pengelola Surat' => 'pengelola',
+        ];
+
+        foreach ($roleSeedMap as $roleName => $emailPrefix) {
+            $user = User::firstOrCreate(
+                ['email' => $emailPrefix.'@test.id'],
+                [
+                    'name' => fake()->name(),
+                    'nip' => fake()->optional()->numerify('##################'),
+                    'pangkat_golongan' => null,
+                    'telp' => fake()->optional()->phoneNumber(),
+                    'tanda_tangan' => null,
+                    'is_active' => true,
+                    'telegram_chat_id' => (string) fake()->unique()->numberBetween(100000000, 999999999),
+                    'email_verified_at' => now(),
+                    'password' => Hash::make('password'),
+                    'remember_token' => Str::random(10),
+                ],
+            );
+
+            if (! $user->hasRole($roleName)) {
+                $user->assignRole($roleName);
+            }
+        }
     }
 }
