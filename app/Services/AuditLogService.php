@@ -152,11 +152,7 @@ class AuditLogService
 
     private function shouldLog(): bool
     {
-        $routeName = request()->route()?->getName();
-
-        return Auth::check()
-            && is_string($routeName)
-            && str_starts_with($routeName, 'filament.admin.resources.');
+        return Auth::check() && ! app()->runningInConsole();
     }
 
     /**
