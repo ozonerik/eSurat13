@@ -8,156 +8,297 @@ use App\Models\JenisSurat;
 use App\Models\KategoriSurat;
 use App\Models\Sekolah;
 use App\Models\Surat;
+use App\Models\TelegramLog;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use Throwable;
 
 class AuditLogService
 {
-    public function logModelEvent(
-        Model $model,
-        string $action,
-        ?array $oldValues = null,
-        ?array $newValues = null,
-        ?string $description = null,
-    ): void {
-        if (Auth::id() === null) {
+    /**
+     * @var array<int, string>
+     */
+    private const EXCLUDED_UPDATE_FIELDS = [
+        'updated_at',
+    ];
+
+    /**
+     * @var array<int, string>
+     */
+    private const SENSITIVE_FIELDS = [
+        'password',
+        'remember_token',
+        'password_confirmation',
+    ];
+
+    public function logCreated(Model $record): void
+    {
+        if (! $this->shouldLog()) {
             return;
         }
 
-        try {
-            AuditLog::create([
-                'surat_id' => $model instanceof Surat ? $model->getKey() : null,
-                'user_id' => Auth::id(),
-                'auditable_type' => $model::class,
-                'auditable_id' => $model->getKey(),
-                'menu_label' => $this->resolveMenuLabel(),
-                'model_label' => $this->resolveModelLabel($model),
-                'record_label' => $this->resolveRecordLabel($model),
-                'action' => $action,
-                'description' => $description ?? $this->resolveDescription($model, $action, $newValues),
-                'ip_address' => Request::ip(),
-                'user_agent' => Request::userAgent(),
-                'old_values' => $this->sanitizeValues($oldValues),
-                'new_values' => $this->sanitizeValues($newValues),
-                'logged_at' => now(),
-            ]);
-        } catch (Throwable $exception) {
-            Log::warning('Failed to write audit log.', [
-                'model' => $model::class,
-                'model_id' => $model->getKey(),
-                'action' => $action,
-                'error' => $exception->getMessage(),
-            ]);
-        }
+        $this->writeLog(
+            record: $record,
+            action: 'create',
+            description: sprintf('%s dibuat melalui menu %s.', $this->resolveSubjectLabel($record), $this->resolveMenuLabel($record)),
+            oldValues: null,
+            newValues: $this->sanitizeAttributes($record->getAttributes(), $record),
+        );
     }
 
-    public function resolveModelLabel(Model $model): string
+    public function logUpdated(Model $record): void
     {
-        return match ($model::class) {
-            Surat::class => 'Surat',
-            User::class => 'User',
-            KategoriSurat::class => 'Kategori Surat',
-            JenisSurat::class => 'Jenis Surat',
-            Sekolah::class => 'Sekolah',
-            CounterSurat::class => 'Counter Surat',
-            Role::class => 'Role',
-            Permission::class => 'Permission',
-            default => class_basename($model),
+        if (! $this->shouldLog()) {
+            return;
+        }
+
+        $changedKeys = array_values(array_diff(array_keys($record->getChanges()), self::EXCLUDED_UPDATE_FIELDS));
+
+        if ($changedKeys === []) {
+            return;
+        }
+
+        $oldValues = [];
+        $newValues = [];
+
+        foreach ($changedKeys as $key) {
+            $oldValues[$key] = $record->getRawOriginal($key);
+            $newValues[$key] = $record->getAttribute($key);
+        }
+
+        $this->writeLog(
+            record: $record,
+            action: 'update',
+            description: sprintf(
+                '%s diperbarui melalui menu %s: %s.',
+                $this->resolveSubjectLabel($record),
+                $this->resolveMenuLabel($record),
+                implode(', ', $changedKeys),
+            ),
+            oldValues: $this->sanitizeAttributes($oldValues, $record),
+            newValues: $this->sanitizeAttributes($newValues, $record),
+        );
+    }
+
+    public function logDeleted(Model $record): void
+    {
+        if (! $this->shouldLog()) {
+            return;
+        }
+
+        $bulkDeleteSource = request()->attributes->get('audit.bulk_delete_source');
+
+        if ($record instanceof Surat && is_string($bulkDeleteSource)) {
+            $this->writeLog(
+                record: $record,
+                action: 'bulk_delete',
+                description: $this->resolveBulkDeleteDescription($record, $bulkDeleteSource),
+                oldValues: $this->sanitizeAttributes($record->getOriginal(), $record),
+                newValues: null,
+            );
+
+            return;
+        }
+
+        $this->writeLog(
+            record: $record,
+            action: 'delete',
+            description: sprintf('%s dihapus melalui menu %s.', $this->resolveSubjectLabel($record), $this->resolveMenuLabel($record)),
+            oldValues: $this->sanitizeAttributes($record->getOriginal(), $record),
+            newValues: null,
+        );
+    }
+
+    /**
+     * @param  array<int, string>  $oldValues
+     * @param  array<int, string>  $newValues
+     */
+    public function logRelationshipChange(Model $record, string $relationshipName, array $oldValues, array $newValues): void
+    {
+        if (! $this->shouldLog()) {
+            return;
+        }
+
+        sort($oldValues);
+        sort($newValues);
+
+        if ($oldValues === $newValues) {
+            return;
+        }
+
+        $relationLabel = match ($relationshipName) {
+            'roles' => 'role',
+            'permissions' => 'permission',
+            default => $relationshipName,
+        };
+
+        $this->writeLog(
+            record: $record,
+            action: 'sync_' . $relationshipName,
+            description: sprintf(
+                '%s memperbarui %s melalui menu %s.',
+                $this->resolveSubjectLabel($record),
+                $relationLabel,
+                $this->resolveMenuLabel($record),
+            ),
+            oldValues: [$relationshipName => $oldValues],
+            newValues: [$relationshipName => $newValues],
+        );
+    }
+
+    private function shouldLog(): bool
+    {
+        $routeName = request()->route()?->getName();
+
+        return Auth::check()
+            && is_string($routeName)
+            && str_starts_with($routeName, 'filament.admin.resources.');
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     * @return array<string, mixed>
+     */
+    private function sanitizeAttributes(array $attributes, Model $record): array
+    {
+        $hidden = method_exists($record, 'getHidden') ? $record->getHidden() : [];
+        $excludedKeys = array_unique([...$hidden, ...self::SENSITIVE_FIELDS]);
+        $sanitized = Arr::except($attributes, $excludedKeys);
+
+        foreach ($sanitized as $key => $value) {
+            $sanitized[$key] = $this->normalizeValue($value);
+        }
+
+        return $sanitized;
+    }
+
+    private function normalizeValue(mixed $value): mixed
+    {
+        if (is_array($value)) {
+            foreach ($value as $key => $item) {
+                $value[$key] = $this->normalizeValue($item);
+            }
+
+            return $value;
+        }
+
+        if ($value instanceof \DateTimeInterface) {
+            return $value->format(DATE_ATOM);
+        }
+
+        if ($value instanceof \BackedEnum) {
+            return $value->value;
+        }
+
+        if (is_object($value)) {
+            return method_exists($value, '__toString') ? (string) $value : json_encode($value);
+        }
+
+        return $value;
+    }
+
+    private function writeLog(Model $record, string $action, string $description, ?array $oldValues, ?array $newValues): void
+    {
+        AuditLog::create([
+            'surat_id' => $this->resolveSuratId($record),
+            'user_id' => Auth::id(),
+            'action' => $action,
+            'description' => $description,
+            'ip_address' => Request::ip(),
+            'user_agent' => Request::userAgent(),
+            'old_values' => $oldValues,
+            'new_values' => $newValues,
+            'logged_at' => now(),
+        ]);
+    }
+
+    private function resolveSuratId(Model $record): ?int
+    {
+        if ($record instanceof Surat) {
+            return $record->getKey();
+        }
+
+        $suratId = $record->getAttribute('surat_id');
+
+        return is_numeric($suratId) ? (int) $suratId : null;
+    }
+
+    private function resolveBulkDeleteDescription(Surat $record, string $source): string
+    {
+        return match ($source) {
+            'surat-ditolak' => sprintf('%s dihapus massal melalui menu Surat Ditolak.', $this->resolveSubjectLabel($record)),
+            'surat-expired' => sprintf('%s dihapus massal melalui menu Surat Expired.', $this->resolveSubjectLabel($record)),
+            default => sprintf('%s dihapus massal melalui menu %s.', $this->resolveSubjectLabel($record), $this->resolveMenuLabel($record)),
         };
     }
 
-    private function resolveMenuLabel(): ?string
+    private function resolveMenuLabel(Model $record): string
     {
-        $routeName = Request::route()?->getName();
-
-        if (! is_string($routeName)) {
-            return null;
-        }
+        $routeName = (string) request()->route()?->getName();
 
         return match (true) {
-            str_contains($routeName, 'resources.surats.draft-surats') => 'Draft Surat',
-            str_contains($routeName, 'resources.surats.surat-dikirim') => 'Surat Dikirim',
-            str_contains($routeName, 'resources.surats.surat-disetujui') => 'Surat Disetujui',
-            str_contains($routeName, 'resources.surats.surat-ditolak') => 'Surat Ditolak',
-            str_contains($routeName, 'resources.surats.surat-expired') => 'Surat Expired',
-            str_contains($routeName, 'resources.surats.review-surats') => 'Review Surat',
-            str_contains($routeName, 'resources.surats.') => 'Buat Surat',
-            str_contains($routeName, 'resources.users.') => 'User',
-            str_contains($routeName, 'resources.roles.') => 'Role',
-            str_contains($routeName, 'resources.permissions.') => 'Permission',
-            str_contains($routeName, 'resources.kategori-surats.') => 'Kategori Surat',
-            str_contains($routeName, 'resources.jenis-surats.') => 'Jenis Surat',
-            str_contains($routeName, 'resources.sekolahs.') => 'Sekolah',
-            str_contains($routeName, 'resources.kepala-sekolahs.') => 'Kepala Sekolah',
-            str_contains($routeName, 'resources.counter-surats.') => 'Counter Surat',
-            default => null,
+            str_contains($routeName, '.draft-surats') => 'Draft Surat',
+            str_contains($routeName, '.surat-dikirim') => 'Surat Dikirim',
+            str_contains($routeName, '.surat-disetujui') => 'Surat Disetujui',
+            str_contains($routeName, '.surat-ditolak') => 'Surat Ditolak',
+            str_contains($routeName, '.surat-expired') => 'Surat Expired',
+            str_contains($routeName, '.review-surats') => 'Review Surat',
+            str_contains($routeName, '.surats.') => 'Surat',
+            str_contains($routeName, '.users.') => 'User',
+            str_contains($routeName, '.kepala-sekolahs.') => 'Kepala Sekolah',
+            str_contains($routeName, '.sekolahs.') => 'Sekolah',
+            str_contains($routeName, '.jenis-surats.') => 'Jenis Surat',
+            str_contains($routeName, '.kategori-surats.') => 'Kategori Surat',
+            str_contains($routeName, '.counter-surats.') => 'Counter Surat',
+            str_contains($routeName, '.roles.') => 'Role',
+            str_contains($routeName, '.permissions.') => 'Permission',
+            str_contains($routeName, '.telegram-logs.') => 'Telegram Log',
+            default => $this->resolveModelLabel($record),
         };
     }
 
-    private function resolveRecordLabel(Model $model): ?string
+    private function resolveModelLabel(Model $record): string
     {
-        return match ($model::class) {
-            Surat::class => $model->no_surat ?: $model->perihal,
-            User::class => $model->name,
-            KategoriSurat::class, JenisSurat::class, Role::class, Permission::class => $model->name ?? $model->nama,
-            Sekolah::class => $model->nama_sekolah,
-            CounterSurat::class => $this->resolveCounterSuratLabel($model),
-            default => method_exists($model, 'getKey') ? (string) $model->getKey() : null,
+        return match ($record::class) {
+            Surat::class => 'Surat',
+            User::class => 'User',
+            Sekolah::class => 'Sekolah',
+            JenisSurat::class => 'Jenis Surat',
+            KategoriSurat::class => 'Kategori Surat',
+            CounterSurat::class => 'Counter Surat',
+            TelegramLog::class => 'Telegram Log',
+            Role::class => 'Role',
+            Permission::class => 'Permission',
+            default => class_basename($record),
         };
     }
 
-    private function resolveCounterSuratLabel(CounterSurat $counterSurat): string
+    private function resolveSubjectLabel(Model $record): string
     {
-        $kategori = $counterSurat->kategoriSurat?->nama;
+        $displayValue = $this->resolveDisplayValue($record);
+        $modelLabel = $this->resolveModelLabel($record);
 
-        if (filled($kategori)) {
-            return sprintf('%s - %s', $kategori, (string) $counterSurat->tahun);
+        if ($displayValue === null) {
+            return sprintf('%s #%s', $modelLabel, $record->getKey());
         }
 
-        return sprintf('Counter %s', (string) $counterSurat->tahun);
+        return sprintf('%s "%s"', $modelLabel, $displayValue);
     }
 
-    private function resolveDescription(Model $model, string $action, ?array $newValues): string
+    private function resolveDisplayValue(Model $record): ?string
     {
-        $label = $this->resolveModelLabel($model);
+        foreach (['name', 'nama', 'no_surat', 'kode', 'email', 'npsn'] as $attribute) {
+            $value = $record->getAttribute($attribute);
 
-        return match ($action) {
-            'create' => sprintf('%s dibuat.', $label),
-            'delete' => sprintf('%s dihapus.', $label),
-            'bulk_delete' => sprintf('%s dihapus massal.', $label),
-            default => $this->resolveUpdateDescription($label, $newValues),
-        };
-    }
-
-    private function resolveUpdateDescription(string $label, ?array $newValues): string
-    {
-        $fields = array_keys($newValues ?? []);
-
-        if ($fields === []) {
-            return sprintf('%s diperbarui.', $label);
-        }
-
-        return sprintf('%s diperbarui: %s.', $label, implode(', ', $fields));
-    }
-
-    private function sanitizeValues(?array $values): ?array
-    {
-        if ($values === null) {
-            return null;
-        }
-
-        foreach (['password', 'remember_token', 'verification_token'] as $key) {
-            if (array_key_exists($key, $values)) {
-                $values[$key] = '[REDACTED]';
+            if (filled($value)) {
+                return (string) $value;
             }
         }
 
-        return $values;
+        return null;
     }
 }

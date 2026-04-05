@@ -15,47 +15,29 @@ class AuditLogForm
     {
         return $schema
             ->components([
-                TextInput::make('menu_label')
-                    ->label('Menu')
-                    ->disabled(),
-                TextInput::make('model_label')
-                    ->label('Data')
-                    ->disabled(),
-                TextInput::make('record_label')
-                    ->label('Record')
-                    ->disabled(),
                 Select::make('surat_id')
                     ->relationship('surat', 'no_surat')
                     ->searchable()
-                    ->preload()
-                    ->disabled(),
+                    ->preload(),
                 Select::make('user_id')
                     ->relationship('user', 'name')
                     ->searchable()
-                    ->preload()
-                    ->disabled(),
+                    ->preload(),
                 TextInput::make('action')
                     ->required()
-                    ->disabled()
                     ->maxLength(255),
                 TextInput::make('ip_address')
-                    ->disabled()
                     ->maxLength(45),
-                TextInput::make('user_agent')
-                    ->disabled(),
+                TextInput::make('user_agent'),
                 DateTimePicker::make('logged_at')
-                    ->required()
-                    ->disabled(),
+                    ->required(),
                 Textarea::make('description')
-                    ->disabled()
                     ->rows(3)
                     ->columnSpanFull(),
                 KeyValue::make('old_values')
-                    ->disabled()
                     ->helperText('Nilai lama sebelum perubahan.')
                     ->columnSpanFull(),
                 KeyValue::make('new_values')
-                    ->disabled()
                     ->helperText('Nilai baru setelah perubahan.')
                     ->columnSpanFull(),
             ]);

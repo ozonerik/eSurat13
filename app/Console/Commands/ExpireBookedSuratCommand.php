@@ -53,11 +53,6 @@ class ExpireBookedSuratCommand extends Command
                         AuditLog::create([
                             'surat_id' => $surat->id,
                             'user_id' => null,
-                            'auditable_type' => Surat::class,
-                            'auditable_id' => $surat->id,
-                            'menu_label' => 'Sistem',
-                            'model_label' => 'Surat',
-                            'record_label' => $surat->no_surat ?: $surat->perihal,
                             'action' => 'booking_expired',
                             'description' => 'Nomor surat dibatalkan otomatis karena melewati batas waktu expired.',
                             'old_values' => [

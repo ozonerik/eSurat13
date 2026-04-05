@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\AuditLogs;
 
 use App\Filament\Resources\AuditLogs\Pages\ListAuditLogs;
+use App\Filament\Resources\AuditLogs\Pages\ViewAuditLog;
 use App\Filament\Resources\AuditLogs\Schemas\AuditLogForm;
+use App\Filament\Resources\AuditLogs\Schemas\AuditLogInfolist;
 use App\Filament\Resources\AuditLogs\Tables\AuditLogsTable;
 use App\Models\AuditLog;
 use App\Models\User;
@@ -35,6 +37,11 @@ class AuditLogResource extends Resource
         return AuditLogForm::configure($schema);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return AuditLogInfolist::configure($schema);
+    }
+
     public static function table(Table $table): Table
     {
         return AuditLogsTable::configure($table);
@@ -51,10 +58,18 @@ class AuditLogResource extends Resource
     {
         return [
             'index' => ListAuditLogs::route('/'),
+            'view'  => ViewAuditLog::route('/{record}'),
         ];
     }
 
     public static function canViewAny(): bool
+    {
+        $user = Auth::user();
+
+        return $user instanceof User && $user->can('audit-log.read');
+    }
+
+    public static function canView(Model $record): bool
     {
         $user = Auth::user();
 

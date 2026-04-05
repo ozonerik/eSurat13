@@ -22,11 +22,6 @@ class AuditLogFactory extends Factory
         return [
             'surat_id' => Surat::factory(),
             'user_id' => User::factory(),
-            'auditable_type' => 'App\\Models\\Surat',
-            'auditable_id' => null,
-            'menu_label' => 'Buat Surat',
-            'model_label' => 'Surat',
-            'record_label' => fake()->optional()->bothify('###/ABC/?/####'),
             'action' => fake()->randomElement(['create', 'book_number', 'upload_draft', 'approve', 'reject']),
             'description' => fake()->sentence(),
             'ip_address' => fake()->ipv4(),
