@@ -155,6 +155,7 @@ class SuratForm
                 FileUpload::make('surat_file_path')
                     ->label('Upload Surat')
                     ->directory('surat')
+                    ->live()
                     ->acceptedFileTypes([
                         'application/pdf',
                     ])

@@ -14,6 +14,12 @@ class EditSurat extends EditRecord
 {
     protected static string $resource = SuratResource::class;
 
+    protected function getSaveFormAction(): Action
+    {
+        return parent::getSaveFormAction()
+            ->label(fn (): string => filled(data_get($this->data, 'surat_file_path')) ? 'Kirim' : 'Simpan');
+    }
+
     public function mount(int|string $record): void
     {
         parent::mount($record);
