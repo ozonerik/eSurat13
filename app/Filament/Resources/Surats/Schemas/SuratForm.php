@@ -165,9 +165,13 @@ class SuratForm
                         }
 
                         $isPembuat = (int) Auth::id() === (int) ($get('pembuat_id') ?? 0);
-                        $isBooked = $get('status') === Surat::STATUS_BOOKED;
+                        $isRevisableStatus = in_array($get('status'), [
+                            Surat::STATUS_BOOKED,
+                            Surat::STATUS_MENUNGGU_PERSETUJUAN,
+                            Surat::STATUS_DITOLAK,
+                        ], true);
 
-                        return ! ($isPembuat && $isBooked);
+                        return ! ($isPembuat && $isRevisableStatus);
                     })
                     ->openable()
                     ->downloadable(),

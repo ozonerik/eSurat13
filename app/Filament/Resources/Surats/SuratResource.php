@@ -86,13 +86,13 @@ class SuratResource extends Resource
         $isPengelola = $user instanceof User && $user->hasRole('Pengelola Surat');
         $isKepalaSekolah = $user instanceof User && $user->hasRole('Kepala Sekolah');
         $canReadReview = $user->can('surat.review.read');
-        $canViewAllSurat = $isAdmin || $isPengelola;
+        $canViewAllStatusSurat = $isAdmin || $isPengelola || $isKepalaSekolah;
         $userId = $user?->id;
 
-        $scopedCount = function (string $status) use ($canViewAllSurat, $userId): int {
+        $scopedCount = function (string $status) use ($canViewAllStatusSurat, $userId): int {
             $query = Surat::query()->where('status', $status);
 
-            if ($canViewAllSurat) {
+            if ($canViewAllStatusSurat) {
                 return $query->count();
             }
 
@@ -103,6 +103,7 @@ class SuratResource extends Resource
         };
 
         $base = static::getRouteBaseName();
+        $source = request()->query('source');
 
         $items = [
             NavigationItem::make('Buat Surat')
@@ -111,7 +112,7 @@ class SuratResource extends Resource
                 ->sort(1)
                 ->url(static::getUrl('create'))
                 ->isActiveWhen(fn (): bool => original_request()->routeIs("{$base}.create")
-                    || original_request()->routeIs("{$base}.edit")),
+                    || (original_request()->routeIs("{$base}.edit") && blank($source))),
 
             NavigationItem::make('Draft Surat')
                 ->group('Transaksi Surat')
@@ -119,7 +120,8 @@ class SuratResource extends Resource
                 ->sort(2)
                 ->url(static::getUrl('draft-surats'))
                 ->badge(($c = $scopedCount(Surat::STATUS_BOOKED)) > 0 ? (string) $c : null, color: 'warning')
-                ->isActiveWhen(fn (): bool => original_request()->routeIs("{$base}.draft-surats")),
+                ->isActiveWhen(fn (): bool => original_request()->routeIs("{$base}.draft-surats")
+                    || (original_request()->routeIs("{$base}.edit") && $source === 'draft-surats')),
 
             NavigationItem::make('Surat Dikirim')
                 ->group('Transaksi Surat')
@@ -127,7 +129,8 @@ class SuratResource extends Resource
                 ->sort(3)
                 ->url(static::getUrl('surat-dikirim'))
                 ->badge(($c = $scopedCount(Surat::STATUS_MENUNGGU_PERSETUJUAN)) > 0 ? (string) $c : null, color: 'info')
-                ->isActiveWhen(fn (): bool => original_request()->routeIs("{$base}.surat-dikirim")),
+                ->isActiveWhen(fn (): bool => original_request()->routeIs("{$base}.surat-dikirim")
+                    || (original_request()->routeIs("{$base}.edit") && $source === 'surat-dikirim')),
 
             NavigationItem::make('Surat Disetujui')
                 ->group('Transaksi Surat')
@@ -135,7 +138,8 @@ class SuratResource extends Resource
                 ->sort(4)
                 ->url(static::getUrl('surat-disetujui'))
                 ->badge(($c = $scopedCount(Surat::STATUS_DISETUJUI)) > 0 ? (string) $c : null, color: 'success')
-                ->isActiveWhen(fn (): bool => original_request()->routeIs("{$base}.surat-disetujui")),
+                ->isActiveWhen(fn (): bool => original_request()->routeIs("{$base}.surat-disetujui")
+                    || (original_request()->routeIs("{$base}.edit") && $source === 'surat-disetujui')),
 
             NavigationItem::make('Surat Ditolak')
                 ->group('Transaksi Surat')
@@ -143,7 +147,8 @@ class SuratResource extends Resource
                 ->sort(5)
                 ->url(static::getUrl('surat-ditolak'))
                 ->badge(($c = $scopedCount(Surat::STATUS_DITOLAK)) > 0 ? (string) $c : null, color: 'danger')
-                ->isActiveWhen(fn (): bool => original_request()->routeIs("{$base}.surat-ditolak")),
+                ->isActiveWhen(fn (): bool => original_request()->routeIs("{$base}.surat-ditolak")
+                    || (original_request()->routeIs("{$base}.edit") && $source === 'surat-ditolak')),
 
             NavigationItem::make('Surat Expired')
                 ->group('Transaksi Surat')
@@ -151,13 +156,14 @@ class SuratResource extends Resource
                 ->sort(6)
                 ->url(static::getUrl('surat-expired'))
                 ->badge(($c = $scopedCount(Surat::STATUS_EXPIRED)) > 0 ? (string) $c : null, color: 'danger')
-                ->isActiveWhen(fn (): bool => original_request()->routeIs("{$base}.surat-expired")),
+                ->isActiveWhen(fn (): bool => original_request()->routeIs("{$base}.surat-expired")
+                    || (original_request()->routeIs("{$base}.edit") && $source === 'surat-expired')),
         ];
 
         if ($canReadReview) {
             $reviewCountQuery = Surat::query()->where('status', Surat::STATUS_MENUNGGU_PERSETUJUAN);
 
-            if ($isKepalaSekolah && ! $canViewAllSurat) {
+            if ($isKepalaSekolah) {
                 $reviewCountQuery
                     ->where('approver_id', $userId)
                     ->whereNull('metadata->' . Surat::METADATA_VIEWED_BY_APPROVER_STATUSES . '->' . Surat::STATUS_MENUNGGU_PERSETUJUAN);
@@ -171,7 +177,8 @@ class SuratResource extends Resource
                 ->sort(7)
                 ->url(static::getUrl('review-surats'))
                 ->badge($reviewCount > 0 ? (string) $reviewCount : null, color: 'warning')
-                ->isActiveWhen(fn (): bool => original_request()->routeIs("{$base}.review-surats"));
+                ->isActiveWhen(fn (): bool => original_request()->routeIs("{$base}.review-surats")
+                    || (original_request()->routeIs("{$base}.edit") && $source === 'review-surats'));
         }
 
         return $items;

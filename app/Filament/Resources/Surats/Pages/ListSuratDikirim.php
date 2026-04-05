@@ -19,7 +19,7 @@ class ListSuratDikirim extends ListRecords
     protected function getTableQuery(): Builder|Relation|null
     {
         $user = Auth::user();
-        $canViewAll = $user instanceof User && $user->hasAnyRole(['Admin', 'Pengelola Surat']);
+        $canViewAll = $user instanceof User && $user->hasAnyRole(['Admin', 'Pengelola Surat', 'Kepala Sekolah']);
 
         return Surat::query()
             ->where('status', Surat::STATUS_MENUNGGU_PERSETUJUAN)

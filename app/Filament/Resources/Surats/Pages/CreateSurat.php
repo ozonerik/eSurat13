@@ -12,6 +12,8 @@ class CreateSurat extends CreateRecord
 {
     protected static string $resource = SuratResource::class;
 
+    protected bool $isSendingSuratSubmission = false;
+
     protected function getCreateFormAction(): Action
     {
         return parent::getCreateFormAction()
@@ -29,5 +31,39 @@ class CreateSurat extends CreateRecord
         }
 
         return $data;
+    }
+
+    protected function beforeCreate(): void
+    {
+        $this->isSendingSuratSubmission = filled(data_get($this->data, 'surat_file_path'));
+    }
+
+    protected function getCreatedNotificationTitle(): ?string
+    {
+        if ($this->isSendingSuratSubmission) {
+            return 'Surat berhasil dikirim';
+        }
+
+        return parent::getCreatedNotificationTitle();
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        $sourcePage = $this->resolveSourcePageByStatus($this->record?->status);
+
+        return static::getResource()::getUrl($sourcePage);
+    }
+
+    protected function resolveSourcePageByStatus(?string $status): string
+    {
+        return match ($status) {
+            
+            \App\Models\Surat::STATUS_BOOKED => 'draft-surats',
+            \App\Models\Surat::STATUS_MENUNGGU_PERSETUJUAN => 'surat-dikirim',
+            \App\Models\Surat::STATUS_DISETUJUI => 'surat-disetujui',
+            \App\Models\Surat::STATUS_DITOLAK => 'surat-ditolak',
+            \App\Models\Surat::STATUS_EXPIRED => 'surat-expired',
+            default => 'create',
+        };
     }
 }

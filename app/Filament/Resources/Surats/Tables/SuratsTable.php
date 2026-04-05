@@ -12,7 +12,10 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+
+use function Filament\Support\original_request;
 
 class SuratsTable
 {
@@ -27,11 +30,10 @@ class SuratsTable
                     ->label('Jenis Surat')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('jenisSurat.template_path')
-                    ->label('Template')
-                    ->state(fn(Surat $record): string => filled($record->jenisSurat?->template_path) ? 'Download' : '-')
-                    ->url(fn(Surat $record): ?string => self::resolveTemplateUrl($record->jenis_surat_id))
-                    ->openUrlInNewTab(),
+                TextColumn::make('perihal')
+                    ->label('Perihal')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('pembuat.name')
                     ->label('Pembuat')
                     ->searchable()
@@ -78,12 +80,40 @@ class SuratsTable
                         );
                     }),
             ])
+            ->recordUrl(fn(Model $record): string => self::resolveEditUrl($record))
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->url(fn(Surat $record): string => self::resolveEditUrl($record)),
                 DeleteAction::make()
-                    ->visible(fn (Surat $record): bool => $record->no_surat === null && SuratResource::canDelete($record)),
+                    ->visible(fn(Surat $record): bool => $record->no_surat === null && SuratResource::canDelete($record)),
             ])
             ->toolbarActions([]);
+    }
+
+    protected static function resolveEditUrl(Model $record): string
+    {
+        $source = self::resolveNavigationSource();
+
+        return SuratResource::getUrl('edit', [
+            'record' => $record,
+            'source' => $source,
+        ]);
+    }
+
+    protected static function resolveNavigationSource(): ?string
+    {
+        $request = original_request();
+        $routeName = $request->route()?->getName();
+
+        return match ($routeName) {
+            'filament.admin.resources.surats.draft-surats' => 'draft-surats',
+            'filament.admin.resources.surats.surat-dikirim' => 'surat-dikirim',
+            'filament.admin.resources.surats.surat-disetujui' => 'surat-disetujui',
+            'filament.admin.resources.surats.surat-ditolak' => 'surat-ditolak',
+            'filament.admin.resources.surats.surat-expired' => 'surat-expired',
+            'filament.admin.resources.surats.review-surats' => 'review-surats',
+            default => null,
+        };
     }
 
     protected static function resolveTemplateUrl(?int $jenisSuratId): ?string

@@ -89,6 +89,18 @@ class Surat extends Model
             if ($surat->status === self::STATUS_DITOLAK) {
                 if (
                     $surat->exists
+                    && $surat->isDirty('surat_file_path')
+                    && filled($surat->surat_file_path)
+                ) {
+                    $surat->status = self::STATUS_MENUNGGU_PERSETUJUAN;
+                    $surat->rejection_note = null;
+                    $surat->released_no_surat = null;
+
+                    return;
+                }
+
+                if (
+                    $surat->exists
                     && $surat->isDirty('status')
                     && filled($surat->no_surat)
                     && blank($surat->released_no_surat)
