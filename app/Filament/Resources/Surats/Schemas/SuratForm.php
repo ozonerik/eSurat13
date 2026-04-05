@@ -202,7 +202,10 @@ class SuratForm
 
                         $user = Auth::user();
 
-                        return ! ($user instanceof User && $user->hasRole('Kepala Sekolah'));
+                        return ! (
+                            $user instanceof User
+                            && ($user->can('surat.review.update.all') || $user->can('surat.review.update.assigned'))
+                        );
                     })
                     ->rows(3)
                     ->columnSpanFull(),

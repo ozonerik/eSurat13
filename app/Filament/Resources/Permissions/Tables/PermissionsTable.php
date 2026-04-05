@@ -18,9 +18,6 @@ class PermissionsTable
                     ->label('Permission')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('guard_name')
-                    ->label('Guard')
-                    ->searchable(),
                 TextColumn::make('roles.name')
                     ->label('Role')
                     ->badge()

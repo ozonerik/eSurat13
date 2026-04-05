@@ -64,26 +64,34 @@ class CounterSuratResource extends Resource
     {
         $user = Auth::user();
 
-        return $user instanceof User && $user->hasAnyRole(['Admin', 'Pengelola Surat']);
+        return $user instanceof User && $user->can('counter-surat.read');
     }
 
     public static function canCreate(): bool
     {
-        return static::canViewAny();
+        $user = Auth::user();
+
+        return $user instanceof User && $user->can('counter-surat.create');
     }
 
     public static function canEdit(Model $record): bool
     {
-        return static::canViewAny();
+        $user = Auth::user();
+
+        return $user instanceof User && $user->can('counter-surat.update');
     }
 
     public static function canDelete(Model $record): bool
     {
-        return static::canViewAny();
+        $user = Auth::user();
+
+        return $user instanceof User && $user->can('counter-surat.delete');
     }
 
     public static function canDeleteAny(): bool
     {
-        return static::canViewAny();
+        $user = Auth::user();
+
+        return $user instanceof User && $user->can('counter-surat.delete');
     }
 }

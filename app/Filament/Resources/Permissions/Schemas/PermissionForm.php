@@ -17,11 +17,6 @@ class PermissionForm
                     ->required()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true),
-                TextInput::make('guard_name')
-                    ->label('Guard')
-                    ->required()
-                    ->default('web')
-                    ->maxLength(255),
                 Select::make('roles')
                     ->label('Role')
                     ->relationship('roles', 'name')

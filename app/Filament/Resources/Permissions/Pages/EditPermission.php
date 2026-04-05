@@ -10,6 +10,13 @@ class EditPermission extends EditRecord
 {
     protected static string $resource = PermissionResource::class;
 
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $data['guard_name'] = 'web';
+
+        return $data;
+    }
+
     protected function getHeaderActions(): array
     {
         return [

@@ -8,4 +8,11 @@ use App\Filament\Resources\Pages\CreateRecordRedirectIndex as CreateRecord;
 class CreateRole extends CreateRecord
 {
     protected static string $resource = RoleResource::class;
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $data['guard_name'] = 'web';
+
+        return $data;
+    }
 }

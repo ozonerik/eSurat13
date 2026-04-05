@@ -66,23 +66,34 @@ class JenisSuratResource extends Resource
         $query = parent::getEloquentQuery();
         $user = Auth::user();
 
-        if ($user instanceof User && $user->hasAnyRole(['Kaprog', 'Wakil Kepala Sekolah']) && ! $user->hasAnyRole(['Admin', 'Pengelola Surat'])) {
+        if (! $user instanceof User) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        if ($user->can('jenis-surat.read.all')) {
+            return $query;
+        }
+
+        if ($user->can('jenis-surat.read.own')) {
             return $query->where('created_by', $user->id);
         }
 
-        return $query;
+        return $query->whereRaw('1 = 0');
     }
 
     public static function canViewAny(): bool
     {
         $user = Auth::user();
 
-        return $user instanceof User && $user->hasAnyRole(['Admin', 'Pengelola Surat', 'Kaprog', 'Wakil Kepala Sekolah']);
+        return $user instanceof User
+            && $user->canAny(['jenis-surat.read.all', 'jenis-surat.read.own']);
     }
 
     public static function canCreate(): bool
     {
-        return static::canViewAny();
+        $user = Auth::user();
+
+        return $user instanceof User && $user->can('jenis-surat.create');
     }
 
     public static function canEdit(Model $record): bool
@@ -93,24 +104,36 @@ class JenisSuratResource extends Resource
             return false;
         }
 
-        if ($user->hasAnyRole(['Admin', 'Pengelola Surat'])) {
+        if ($user->can('jenis-surat.update.all')) {
             return true;
         }
 
         /** @var JenisSurat $record */
-        return $user->hasAnyRole(['Kaprog', 'Wakil Kepala Sekolah'])
+        return $user->can('jenis-surat.update.own')
             && ((int) $record->created_by === (int) $user->id);
     }
 
     public static function canDelete(Model $record): bool
     {
-        return static::canEdit($record);
+        $user = Auth::user();
+
+        if (! $user instanceof User) {
+            return false;
+        }
+
+        if ($user->can('jenis-surat.delete.all')) {
+            return true;
+        }
+
+        /** @var JenisSurat $record */
+        return $user->can('jenis-surat.delete.own')
+            && ((int) $record->created_by === (int) $user->id);
     }
 
     public static function canDeleteAny(): bool
     {
         $user = Auth::user();
 
-        return $user instanceof User && $user->hasAnyRole(['Admin', 'Pengelola Surat']);
+        return $user instanceof User && $user->can('jenis-surat.delete.all');
     }
 }

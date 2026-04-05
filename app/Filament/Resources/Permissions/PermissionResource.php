@@ -64,26 +64,34 @@ class PermissionResource extends Resource
     {
         $user = Auth::user();
 
-        return $user instanceof User && $user->hasRole('Admin');
+        return $user instanceof User && $user->can('permission.read');
     }
 
     public static function canCreate(): bool
     {
-        return static::canViewAny();
+        $user = Auth::user();
+
+        return $user instanceof User && $user->can('permission.create');
     }
 
     public static function canEdit(Model $record): bool
     {
-        return static::canViewAny();
+        $user = Auth::user();
+
+        return $user instanceof User && $user->can('permission.update');
     }
 
     public static function canDelete(Model $record): bool
     {
-        return static::canViewAny();
+        $user = Auth::user();
+
+        return $user instanceof User && $user->can('permission.delete');
     }
 
     public static function canDeleteAny(): bool
     {
-        return static::canViewAny();
+        $user = Auth::user();
+
+        return $user instanceof User && $user->can('permission.delete');
     }
 }

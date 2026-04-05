@@ -20,6 +20,19 @@ use UnitEnum;
 
 class RoleResource extends Resource
 {
+    /**
+     * @var array<int, string>
+     */
+    public const PROTECTED_ROLE_NAMES = [
+        'Admin',
+        'Kepala Sekolah',
+        'Guru',
+        'TU',
+        'Kaprog',
+        'Wakil Kepala Sekolah',
+        'Pengelola Surat',
+    ];
+
     protected static ?string $model = Role::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
@@ -64,26 +77,48 @@ class RoleResource extends Resource
     {
         $user = Auth::user();
 
-        return $user instanceof User && $user->hasRole('Admin');
+        return $user instanceof User && $user->can('role.read');
     }
 
     public static function canCreate(): bool
     {
-        return static::canViewAny();
+        $user = Auth::user();
+
+        return $user instanceof User && $user->can('role.create');
     }
 
     public static function canEdit(Model $record): bool
     {
-        return static::canViewAny();
+        $user = Auth::user();
+
+        return $user instanceof User && $user->can('role.update');
     }
 
     public static function canDelete(Model $record): bool
     {
-        return static::canViewAny();
+        $user = Auth::user();
+
+        if (! $user instanceof User || ! $user->can('role.delete')) {
+            return false;
+        }
+
+        /** @var Role $record */
+        return ! static::isProtectedRoleName($record->name);
     }
 
     public static function canDeleteAny(): bool
     {
-        return static::canViewAny();
+        $user = Auth::user();
+
+        return $user instanceof User && $user->can('role.delete');
+    }
+
+    public static function isProtectedRoleName(?string $roleName): bool
+    {
+        if ($roleName === null) {
+            return false;
+        }
+
+        return in_array($roleName, static::PROTECTED_ROLE_NAMES, true);
     }
 }

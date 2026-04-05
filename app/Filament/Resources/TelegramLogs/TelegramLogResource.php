@@ -62,7 +62,7 @@ class TelegramLogResource extends Resource
     {
         $user = Auth::user();
 
-        return $user instanceof User && $user->hasRole('Admin');
+        return $user instanceof User && $user->can('telegram-log.read');
     }
 
     public static function canCreate(): bool

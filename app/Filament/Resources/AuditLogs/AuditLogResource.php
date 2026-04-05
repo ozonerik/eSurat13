@@ -62,7 +62,7 @@ class AuditLogResource extends Resource
     {
         $user = Auth::user();
 
-        return $user instanceof User && $user->hasRole('Admin');
+        return $user instanceof User && $user->can('audit-log.read');
     }
 
     public static function canCreate(): bool

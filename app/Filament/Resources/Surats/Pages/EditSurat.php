@@ -143,19 +143,19 @@ class EditSurat extends EditRecord
             return false;
         }
 
-        if (! $user instanceof User || ! $user->can('surat.review.update')) {
+        if (! $user instanceof User) {
             return false;
         }
 
-        if ($user->hasRole('Admin')) {
-            return $this->record->status === Surat::STATUS_MENUNGGU_PERSETUJUAN;
-        }
-
-        if (! $user->hasRole('Kepala Sekolah')) {
+        if ($this->record->status !== Surat::STATUS_MENUNGGU_PERSETUJUAN) {
             return false;
         }
 
-        return ($this->record->status === Surat::STATUS_MENUNGGU_PERSETUJUAN)
+        if ($user->can('surat.review.update.all')) {
+            return true;
+        }
+
+        return $user->can('surat.review.update.assigned')
             && ((int) $this->record->approver_id === (int) $user->id);
     }
 

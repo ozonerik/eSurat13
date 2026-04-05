@@ -82,17 +82,17 @@ class SuratResource extends Resource
             return [];
         }
 
-        $isAdmin = $user instanceof User && $user->hasRole('Admin');
-        $isPengelola = $user instanceof User && $user->hasRole('Pengelola Surat');
-        $isKepalaSekolah = $user instanceof User && $user->hasRole('Kepala Sekolah');
-        $canReadReview = $user->can('surat.review.read');
-        $canViewAllStatusSurat = $isAdmin || $isPengelola || $isKepalaSekolah;
+        $canReadReview = $user->can('surat.review.read.all') || $user->can('surat.review.read.assigned');
         $userId = $user?->id;
 
-        $scopedCount = function (string $status) use ($canViewAllStatusSurat, $userId): int {
+        $scopedCount = function (string $status, string $readAllPermission, string $readOwnPermission) use ($user, $userId): int {
+            if (! $user->can($readAllPermission) && ! $user->can($readOwnPermission)) {
+                return 0;
+            }
+
             $query = Surat::query()->where('status', $status);
 
-            if ($canViewAllStatusSurat) {
+            if ($user->can($readAllPermission)) {
                 return $query->count();
             }
 
@@ -119,7 +119,7 @@ class SuratResource extends Resource
                 ->icon(Heroicon::OutlinedDocumentText)
                 ->sort(2)
                 ->url(static::getUrl('draft-surats'))
-                ->badge(($c = $scopedCount(Surat::STATUS_BOOKED)) > 0 ? (string) $c : null, color: 'warning')
+                ->badge(($c = $scopedCount(Surat::STATUS_BOOKED, 'surat.draft.read.all', 'surat.draft.read.own')) > 0 ? (string) $c : null, color: 'warning')
                 ->isActiveWhen(fn (): bool => original_request()->routeIs("{$base}.draft-surats")
                     || (original_request()->routeIs("{$base}.edit") && $source === 'draft-surats')),
 
@@ -128,7 +128,7 @@ class SuratResource extends Resource
                 ->icon(Heroicon::OutlinedPaperAirplane)
                 ->sort(3)
                 ->url(static::getUrl('surat-dikirim'))
-                ->badge(($c = $scopedCount(Surat::STATUS_MENUNGGU_PERSETUJUAN)) > 0 ? (string) $c : null, color: 'info')
+                ->badge(($c = $scopedCount(Surat::STATUS_MENUNGGU_PERSETUJUAN, 'surat.dikirim.read.all', 'surat.dikirim.read.own')) > 0 ? (string) $c : null, color: 'info')
                 ->isActiveWhen(fn (): bool => original_request()->routeIs("{$base}.surat-dikirim")
                     || (original_request()->routeIs("{$base}.edit") && $source === 'surat-dikirim')),
 
@@ -137,7 +137,7 @@ class SuratResource extends Resource
                 ->icon(Heroicon::OutlinedCheckCircle)
                 ->sort(4)
                 ->url(static::getUrl('surat-disetujui'))
-                ->badge(($c = $scopedCount(Surat::STATUS_DISETUJUI)) > 0 ? (string) $c : null, color: 'success')
+                ->badge(($c = $scopedCount(Surat::STATUS_DISETUJUI, 'surat.disetujui.read.all', 'surat.disetujui.read.own')) > 0 ? (string) $c : null, color: 'success')
                 ->isActiveWhen(fn (): bool => original_request()->routeIs("{$base}.surat-disetujui")
                     || (original_request()->routeIs("{$base}.edit") && $source === 'surat-disetujui')),
 
@@ -146,7 +146,7 @@ class SuratResource extends Resource
                 ->icon(Heroicon::OutlinedXCircle)
                 ->sort(5)
                 ->url(static::getUrl('surat-ditolak'))
-                ->badge(($c = $scopedCount(Surat::STATUS_DITOLAK)) > 0 ? (string) $c : null, color: 'danger')
+                ->badge(($c = $scopedCount(Surat::STATUS_DITOLAK, 'surat.ditolak.read.all', 'surat.ditolak.read.own')) > 0 ? (string) $c : null, color: 'danger')
                 ->isActiveWhen(fn (): bool => original_request()->routeIs("{$base}.surat-ditolak")
                     || (original_request()->routeIs("{$base}.edit") && $source === 'surat-ditolak')),
 
@@ -155,7 +155,7 @@ class SuratResource extends Resource
                 ->icon(Heroicon::OutlinedClock)
                 ->sort(6)
                 ->url(static::getUrl('surat-expired'))
-                ->badge(($c = $scopedCount(Surat::STATUS_EXPIRED)) > 0 ? (string) $c : null, color: 'danger')
+                ->badge(($c = $scopedCount(Surat::STATUS_EXPIRED, 'surat.expired.read.all', 'surat.expired.read.own')) > 0 ? (string) $c : null, color: 'danger')
                 ->isActiveWhen(fn (): bool => original_request()->routeIs("{$base}.surat-expired")
                     || (original_request()->routeIs("{$base}.edit") && $source === 'surat-expired')),
         ];
@@ -163,7 +163,7 @@ class SuratResource extends Resource
         if ($canReadReview) {
             $reviewCountQuery = Surat::query()->where('status', Surat::STATUS_MENUNGGU_PERSETUJUAN);
 
-            if ($isKepalaSekolah) {
+            if ($user->can('surat.review.read.assigned')) {
                 $reviewCountQuery
                     ->where('approver_id', $userId)
                     ->whereNull('metadata->' . Surat::METADATA_VIEWED_BY_APPROVER_STATUSES . '->' . Surat::STATUS_MENUNGGU_PERSETUJUAN);
@@ -189,14 +189,14 @@ class SuratResource extends Resource
         $user = Auth::user();
 
         return $user instanceof User
-            && $user->hasAnyRole([
-                'Admin',
-                'Kepala Sekolah',
-                'Guru',
-                'TU',
-                'Kaprog',
-                'Wakil Kepala Sekolah',
-                'Pengelola Surat',
+            && $user->canAny([
+                'surat.create',
+                'surat.draft.read.all', 'surat.draft.read.own',
+                'surat.dikirim.read.all', 'surat.dikirim.read.own',
+                'surat.disetujui.read.all', 'surat.disetujui.read.own',
+                'surat.ditolak.read.all', 'surat.ditolak.read.own',
+                'surat.expired.read.all', 'surat.expired.read.own',
+                'surat.review.read.all', 'surat.review.read.assigned',
             ]);
     }
 
@@ -220,15 +220,16 @@ class SuratResource extends Resource
             return true;
         }
 
-        if (! $user->can('surat.review.update') || $record->status !== Surat::STATUS_MENUNGGU_PERSETUJUAN) {
+        if ($record->status !== Surat::STATUS_MENUNGGU_PERSETUJUAN) {
             return false;
         }
 
-        if ($user->hasRole('Admin')) {
+        if ($user->can('surat.review.update.all')) {
             return true;
         }
 
-        return $user->hasRole('Kepala Sekolah') && ((int) $record->approver_id === (int) $user->id);
+        return $user->can('surat.review.update.assigned')
+            && ((int) $record->approver_id === (int) $user->id);
     }
 
     public static function canDelete(Model $record): bool

@@ -72,12 +72,14 @@ class KepalaSekolahResource extends Resource
     {
         $user = Auth::user();
 
-        return $user instanceof User && $user->hasAnyRole(['Admin', 'Kepala Sekolah', 'TU']);
+        return $user instanceof User && $user->can('kepala-sekolah.read');
     }
 
     public static function canEdit(Model $record): bool
     {
-        return static::canViewAny();
+        $user = Auth::user();
+
+        return $user instanceof User && $user->can('kepala-sekolah.update');
     }
 
     public static function canDelete(Model $record): bool

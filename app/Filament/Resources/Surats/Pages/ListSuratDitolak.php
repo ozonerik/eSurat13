@@ -19,7 +19,12 @@ class ListSuratDitolak extends ListRecords
     protected function getTableQuery(): Builder|Relation|null
     {
         $user = Auth::user();
-        $canViewAll = $user instanceof User && $user->hasAnyRole(['Admin', 'Pengelola Surat', 'Kepala Sekolah']);
+
+        if (! $user instanceof User) {
+            return Surat::query()->whereRaw('1 = 0');
+        }
+
+        $canViewAll = $user->can('surat.ditolak.read.all');
 
         return Surat::query()
             ->where('status', Surat::STATUS_DITOLAK)
