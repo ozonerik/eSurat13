@@ -19,6 +19,13 @@ class QueueHealthWidget extends StatsOverviewWidget
 
     protected ?string $pollingInterval = '10s';
 
+    public static function canView(): bool
+    {
+        $user = Auth::user();
+
+        return $user instanceof User && $user->hasRole('Admin');
+    }
+
     /**
      * @return array<Action>
      */
