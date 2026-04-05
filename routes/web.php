@@ -1,10 +1,12 @@
 <?php
 
 use App\Models\JenisSurat;
+use App\Models\Sekolah;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    $sekolah = Sekolah::first() ?? new Sekolah();
+    return view('welcome', compact('sekolah'));
 });
 
 Route::get('/templates/{jenisSurat}/download', function (JenisSurat $jenisSurat) {

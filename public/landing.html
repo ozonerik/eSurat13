@@ -1,27 +1,32 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $sekolah->nama_sekolah ?? config('app.name') }} - Sistem Manajemen Surat Digital</title>
-    <link rel="icon" type="image/webp" href="{{ asset('images/logo.webp') }}">
+    <title>eSurat13 - Sistem Manajemen Surat Digital Modern</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
         @keyframes blob {
-            0%   { transform: translate(0px, 0px) scale(1); }
-            33%  { transform: translate(30px, -50px) scale(1.1); }
-            66%  { transform: translate(-20px, 20px) scale(0.9); }
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
             100% { transform: translate(0px, 0px) scale(1); }
         }
-        .animate-blob { animation: blob 7s infinite; }
-        .animation-delay-2000 { animation-delay: 2s; }
+        .animate-blob {
+            animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
         .nav-scrolled {
-            background-color: rgba(255,255,255,0.8);
+            background-color: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(12px);
-            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
             padding-top: 0.75rem;
             padding-bottom: 0.75rem;
         }
@@ -32,23 +37,31 @@
     <!-- Navigation -->
     <nav id="navbar" class="fixed w-full z-50 transition-all duration-300 py-5">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <img src="{{ asset('images/logo.webp') }}" alt="Logo" class="h-10 w-10 object-contain rounded-lg">
-                <span class="text-lg font-bold tracking-tight text-blue-900 leading-tight">{{ $sekolah->nama_sekolah ?? config('app.name') }}</span>
+            <div class="flex items-center gap-2">
+                <div class="bg-blue-600 p-2 rounded-lg">
+                    <i data-lucide="mail" class="w-6 h-6 text-white"></i>
+                </div>
+                <span class="text-xl font-bold tracking-tight text-blue-900">eSurat<span class="text-blue-600">13</span></span>
             </div>
+            
             <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-700">
                 <a href="#features" class="hover:text-blue-600 transition-colors">Fitur</a>
                 <a href="#about" class="hover:text-blue-600 transition-colors">Tentang</a>
-                <a href="/admin/login" class="bg-blue-600 text-white px-5 py-2.5 rounded-full hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">Mulai Sekarang</a>
+                <button class="bg-blue-600 text-white px-5 py-2.5 rounded-full hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
+                    Coba Sekarang
+                </button>
             </div>
+
             <button class="md:hidden p-2 text-slate-700" onclick="toggleMenu()">
                 <i id="menu-icon" data-lucide="menu"></i>
             </button>
         </div>
+
+        <!-- Mobile Menu -->
         <div id="mobile-menu" class="hidden md:hidden bg-white border-t p-4 flex flex-col gap-4 shadow-xl">
             <a href="#features" class="py-2" onclick="toggleMenu()">Fitur</a>
             <a href="#about" class="py-2" onclick="toggleMenu()">Tentang</a>
-            <a href="/admin/login" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg w-full text-center">Mulai Sekarang</a>
+            <button class="bg-blue-600 text-white px-5 py-2.5 rounded-lg w-full">Coba Sekarang</button>
         </div>
     </nav>
 
@@ -61,37 +74,48 @@
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
                     </span>
-                    Sistem Persuratan Digital
+                    Versi 1.0 Kini Tersedia
                 </div>
                 <h1 class="text-4xl md:text-6xl font-extrabold text-slate-900 leading-tight">
-                    Kelola Surat <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Lebih Cerdas</span> &amp; Efisien.
+                    Kelola Surat <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Lebih Cerdas</span> & Efisien.
                 </h1>
                 <p class="text-lg text-slate-600 max-w-xl mx-auto lg:mx-0">
-                    {{ $sekolah->visi_sekolah ?? 'Transformasi digital untuk administrasi persuratan yang lebih efisien, aman, dan mudah diakses.' }}
+                    Transformasi digital untuk administrasi persuratan Anda. eSurat13 membantu organisasi mengelola arsip surat masuk dan keluar dengan sistem keamanan tinggi dan aksesibilitas mudah.
                 </p>
                 <div class="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 pt-4">
-                    <a href="/admin/login" class="flex items-center justify-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-xl shadow-blue-200">
+                    <button class="flex items-center justify-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-xl shadow-blue-200">
                         Mulai Sekarang <i data-lucide="arrow-right" class="w-5 h-5"></i>
-                    </a>
-                    <a href="#features" class="flex items-center justify-center gap-2 bg-white text-slate-700 border border-slate-200 px-8 py-4 rounded-xl font-bold hover:bg-slate-50 transition-all">
-                        Pelajari Fitur
-                    </a>
+                    </button>
+                    <button class="flex items-center justify-center gap-2 bg-white text-slate-700 border border-slate-200 px-8 py-4 rounded-xl font-bold hover:bg-slate-50 transition-all">
+                        Pelajari Dokumentasi
+                    </button>
                 </div>
             </div>
+            
             <div class="lg:w-1/2 mt-16 lg:mt-0 relative">
                 <div class="absolute -top-10 -left-10 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
                 <div class="absolute -bottom-10 -right-10 w-72 h-72 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
                 <div class="relative bg-white p-2 rounded-3xl shadow-2xl border border-slate-100">
-                    <div class="bg-slate-900 rounded-2xl overflow-hidden aspect-video">
+                    <div class="bg-slate-900 rounded-2xl overflow-hidden aspect-video flex items-center justify-center text-slate-400 text-sm">
+                        <!-- Simulated UI Content -->
                         <div class="w-full h-full p-6 bg-slate-50 flex flex-col gap-4 text-left">
                             <div class="flex justify-between items-center border-b pb-4">
                                 <div class="h-4 w-32 bg-slate-200 rounded"></div>
                                 <div class="h-8 w-8 bg-blue-600 rounded-full"></div>
                             </div>
                             <div class="grid grid-cols-3 gap-4">
-                                <div class="h-20 bg-white border rounded-xl p-3 space-y-2"><div class="h-3 w-1/2 bg-slate-100 rounded"></div><div class="h-6 w-3/4 bg-blue-50 rounded"></div></div>
-                                <div class="h-20 bg-white border rounded-xl p-3 space-y-2"><div class="h-3 w-1/2 bg-slate-100 rounded"></div><div class="h-6 w-3/4 bg-green-50 rounded"></div></div>
-                                <div class="h-20 bg-white border rounded-xl p-3 space-y-2"><div class="h-3 w-1/2 bg-slate-100 rounded"></div><div class="h-6 w-3/4 bg-orange-50 rounded"></div></div>
+                                <div class="h-20 bg-white border rounded-xl p-3 space-y-2">
+                                    <div class="h-3 w-1/2 bg-slate-100 rounded"></div>
+                                    <div class="h-6 w-3/4 bg-blue-50 rounded"></div>
+                                </div>
+                                <div class="h-20 bg-white border rounded-xl p-3 space-y-2">
+                                    <div class="h-3 w-1/2 bg-slate-100 rounded"></div>
+                                    <div class="h-6 w-3/4 bg-green-50 rounded"></div>
+                                </div>
+                                <div class="h-20 bg-white border rounded-xl p-3 space-y-2">
+                                    <div class="h-3 w-1/2 bg-slate-100 rounded"></div>
+                                    <div class="h-6 w-3/4 bg-orange-50 rounded"></div>
+                                </div>
                             </div>
                             <div class="flex-1 bg-white border rounded-xl p-4 space-y-3">
                                 <div class="h-4 w-full bg-slate-50 rounded"></div>
@@ -112,34 +136,53 @@
                 <h2 class="text-blue-600 font-bold tracking-wider uppercase text-sm mb-3">Fitur Utama</h2>
                 <p class="text-3xl md:text-4xl font-bold text-slate-900">Segala yang Anda butuhkan untuk kelola surat menyurat.</p>
             </div>
+            
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Fitur 1 -->
                 <div class="group p-8 rounded-2xl bg-slate-50 border border-transparent hover:border-blue-100 hover:bg-white hover:shadow-xl transition-all duration-300 text-left">
-                    <div class="bg-white w-12 h-12 rounded-xl flex items-center justify-center shadow-sm mb-6 group-hover:scale-110 transition-transform duration-300"><i data-lucide="inbox" class="w-6 h-6 text-blue-600"></i></div>
+                    <div class="bg-white w-12 h-12 rounded-xl flex items-center justify-center shadow-sm mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i data-lucide="inbox" class="w-6 h-6 text-blue-600"></i>
+                    </div>
                     <h3 class="text-xl font-bold mb-3 text-slate-800">Manajemen Surat Masuk</h3>
                     <p class="text-slate-600 leading-relaxed">Catat dan arsipkan setiap surat masuk dengan detail pengirim dan perihal yang terorganisir.</p>
                 </div>
+                <!-- Fitur 2 -->
                 <div class="group p-8 rounded-2xl bg-slate-50 border border-transparent hover:border-blue-100 hover:bg-white hover:shadow-xl transition-all duration-300 text-left">
-                    <div class="bg-white w-12 h-12 rounded-xl flex items-center justify-center shadow-sm mb-6 group-hover:scale-110 transition-transform duration-300"><i data-lucide="send" class="w-6 h-6 text-blue-600"></i></div>
+                    <div class="bg-white w-12 h-12 rounded-xl flex items-center justify-center shadow-sm mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i data-lucide="send" class="w-6 h-6 text-blue-600"></i>
+                    </div>
                     <h3 class="text-xl font-bold mb-3 text-slate-800">Manajemen Surat Keluar</h3>
                     <p class="text-slate-600 leading-relaxed">Kelola draf dan pengiriman surat keluar secara sistematis dengan nomor agenda otomatis.</p>
                 </div>
+                <!-- Fitur 3 -->
                 <div class="group p-8 rounded-2xl bg-slate-50 border border-transparent hover:border-blue-100 hover:bg-white hover:shadow-xl transition-all duration-300 text-left">
-                    <div class="bg-white w-12 h-12 rounded-xl flex items-center justify-center shadow-sm mb-6 group-hover:scale-110 transition-transform duration-300"><i data-lucide="search" class="w-6 h-6 text-blue-600"></i></div>
+                    <div class="bg-white w-12 h-12 rounded-xl flex items-center justify-center shadow-sm mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i data-lucide="search" class="w-6 h-6 text-blue-600"></i>
+                    </div>
                     <h3 class="text-xl font-bold mb-3 text-slate-800">Pencarian Cepat</h3>
                     <p class="text-slate-600 leading-relaxed">Temukan dokumen yang Anda cari dalam hitungan detik dengan sistem indeksasi cerdas.</p>
                 </div>
+                <!-- Fitur 4 -->
                 <div class="group p-8 rounded-2xl bg-slate-50 border border-transparent hover:border-blue-100 hover:bg-white hover:shadow-xl transition-all duration-300 text-left">
-                    <div class="bg-white w-12 h-12 rounded-xl flex items-center justify-center shadow-sm mb-6 group-hover:scale-110 transition-transform duration-300"><i data-lucide="bar-chart-3" class="w-6 h-6 text-blue-600"></i></div>
+                    <div class="bg-white w-12 h-12 rounded-xl flex items-center justify-center shadow-sm mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i data-lucide="bar-chart-3" class="w-6 h-6 text-blue-600"></i>
+                    </div>
                     <h3 class="text-xl font-bold mb-3 text-slate-800">Dashboard Statistik</h3>
                     <p class="text-slate-600 leading-relaxed">Pantau volume surat menyurat harian melalui visualisasi data yang informatif.</p>
                 </div>
+                <!-- Fitur 5 -->
                 <div class="group p-8 rounded-2xl bg-slate-50 border border-transparent hover:border-blue-100 hover:bg-white hover:shadow-xl transition-all duration-300 text-left">
-                    <div class="bg-white w-12 h-12 rounded-xl flex items-center justify-center shadow-sm mb-6 group-hover:scale-110 transition-transform duration-300"><i data-lucide="shield-check" class="w-6 h-6 text-blue-600"></i></div>
+                    <div class="bg-white w-12 h-12 rounded-xl flex items-center justify-center shadow-sm mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i data-lucide="shield-check" class="w-6 h-6 text-blue-600"></i>
+                    </div>
                     <h3 class="text-xl font-bold mb-3 text-slate-800">Keamanan Data</h3>
                     <p class="text-slate-600 leading-relaxed">Sistem otentikasi berlapis memastikan hanya pihak berwenang yang dapat mengakses arsip.</p>
                 </div>
+                <!-- Fitur 6 -->
                 <div class="group p-8 rounded-2xl bg-slate-50 border border-transparent hover:border-blue-100 hover:bg-white hover:shadow-xl transition-all duration-300 text-left">
-                    <div class="bg-white w-12 h-12 rounded-xl flex items-center justify-center shadow-sm mb-6 group-hover:scale-110 transition-transform duration-300"><i data-lucide="zap" class="w-6 h-6 text-blue-600"></i></div>
+                    <div class="bg-white w-12 h-12 rounded-xl flex items-center justify-center shadow-sm mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i data-lucide="zap" class="w-6 h-6 text-blue-600"></i>
+                    </div>
                     <h3 class="text-xl font-bold mb-3 text-slate-800">Performa Cepat</h3>
                     <p class="text-slate-600 leading-relaxed">Dibangun dengan teknologi modern untuk memastikan akses data tanpa hambatan.</p>
                 </div>
@@ -165,7 +208,7 @@
                         </div>
                     </div>
                 </div>
-
+                
                 <div class="lg:w-1/2 space-y-8">
                     <h2 class="text-3xl md:text-4xl font-bold text-slate-900 leading-tight">Mengapa Memilih eSurat13?</h2>
                     <div class="space-y-6">
@@ -195,9 +238,9 @@
                         </div>
                     </div>
                     <div class="pt-4">
-                        <a href="/admin/login" class="text-blue-600 font-bold flex items-center gap-2 hover:gap-3 transition-all">
-                            Mulai Sekarang Juga <i data-lucide="chevron-right" class="w-5 h-5"></i>
-                        </a>
+                        <button class="text-blue-600 font-bold flex items-center gap-2 hover:gap-3 transition-all">
+                            Lihat Demo Selengkapnya <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -211,20 +254,20 @@
                 <div class="absolute top-0 left-0 w-full h-full opacity-10">
                     <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                         <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
-                            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="currentColor" strokeWidth="0.5"/>
+                            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="currentColor" strokeWidth="0.5" />
                         </pattern>
-                        <rect width="100" height="100" fill="url(#grid)"/>
+                        <rect width="100" height="100" fill="url(#grid)" />
                     </svg>
                 </div>
                 <div class="relative z-10 space-y-6">
                     <h2 class="text-3xl md:text-5xl font-bold">Siap Mendigitalisasi Surat Menyurat Anda?</h2>
                     <p class="text-blue-100 text-lg max-w-2xl mx-auto">
-                        {{ $sekolah->nama_sekolah ?? config('app.name') }} hadir dengan sistem persuratan digital modern untuk meningkatkan efisiensi administrasi.
+                        Bergabunglah dengan organisasi modern lainnya yang telah meningkatkan produktivitas administrasi dengan eSurat13.
                     </p>
                     <div class="pt-6">
-                        <a href="/admin/login" class="inline-block bg-white text-blue-600 px-10 py-4 rounded-2xl font-bold text-lg hover:bg-slate-50 transition-all shadow-xl">
-                            Mulai Sekarang
-                        </a>
+                        <button class="bg-white text-blue-600 px-10 py-4 rounded-2xl font-bold text-lg hover:bg-slate-50 transition-all shadow-xl">
+                            Daftar Sekarang — Gratis
+                        </button>
                     </div>
                 </div>
             </div>
@@ -235,35 +278,43 @@
     <footer class="bg-slate-900 text-slate-400 py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row justify-between items-center gap-8 border-b border-slate-800 pb-12 mb-12">
-                <div class="flex items-center gap-3">
-                    <img src="{{ asset('images/logo.webp') }}" alt="Logo" class="h-8 w-8 object-contain rounded">
-                    <span class="text-lg font-bold tracking-tight text-white">{{ $sekolah->nama_sekolah ?? config('app.name') }}</span>
+                <div class="flex items-center gap-2 text-left">
+                    <div class="bg-blue-600 p-2 rounded-lg">
+                        <i data-lucide="mail" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <span class="text-xl font-bold tracking-tight text-white underline decoration-blue-500 decoration-2 underline-offset-4">eSurat13</span>
                 </div>
-                @if ($sekolah->alamat_sekolah ?? false)
-                <p class="text-sm text-slate-500 text-center">
-                    {{ $sekolah->alamat_sekolah }}{{ $sekolah->kota_kab ? ', '.$sekolah->kota_kab : '' }}{{ $sekolah->provinsi ? ', '.$sekolah->provinsi : '' }}
-                </p>
-                @endif
                 <div class="flex flex-wrap justify-center gap-8 text-sm">
+                    <a href="#" class="hover:text-white transition-colors">Syarat & Ketentuan</a>
+                    <a href="#" class="hover:text-white transition-colors">Kebijakan Privasi</a>
                     <a href="https://github.com/ozonerik/eSurat13" target="_blank" class="hover:text-white transition-colors">GitHub Repository</a>
                 </div>
             </div>
             <div class="text-center text-sm">
-                <p>&copy; <span id="year"></span> {{ $sekolah->nama_sekolah ?? config('app.name') }}. Sistem Manajemen Surat Digital.</p>
+                <p>© <span id="year"></span> eSurat13 Project. Dibuat untuk efisiensi administrasi digital.</p>
             </div>
         </div>
     </footer>
 
     <script>
+        // Initialize Lucide icons
         lucide.createIcons();
-        window.addEventListener('scroll', function () {
+
+        // Navbar Scroll Effect
+        window.addEventListener('scroll', function() {
             const navbar = document.getElementById('navbar');
-            if (window.scrollY > 50) navbar.classList.add('nav-scrolled');
-            else navbar.classList.remove('nav-scrolled');
+            if (window.scrollY > 50) {
+                navbar.classList.add('nav-scrolled');
+            } else {
+                navbar.classList.remove('nav-scrolled');
+            }
         });
+
+        // Mobile Menu Toggle
         function toggleMenu() {
             const menu = document.getElementById('mobile-menu');
             const icon = document.getElementById('menu-icon');
+            
             if (menu.classList.contains('hidden')) {
                 menu.classList.remove('hidden');
                 icon.setAttribute('data-lucide', 'x');
@@ -273,6 +324,8 @@
             }
             lucide.createIcons();
         }
+
+        // Set current year in footer
         document.getElementById('year').textContent = new Date().getFullYear();
     </script>
 </body>
