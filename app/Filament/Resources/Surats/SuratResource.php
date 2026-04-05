@@ -233,7 +233,7 @@ class SuratResource extends Resource
         }
 
         /** @var Surat $record */
-        if (filled($record->no_surat)) {
+        if ($record->no_surat !== null) {
             return false;
         }
 

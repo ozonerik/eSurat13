@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Surats\Tables;
 
+use App\Filament\Resources\Surats\SuratResource;
 use App\Models\KategoriSurat;
 use App\Models\JenisSurat;
 use App\Models\Surat;
@@ -79,7 +80,8 @@ class SuratsTable
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->visible(fn (Surat $record): bool => $record->no_surat === null && SuratResource::canDelete($record)),
             ])
             ->toolbarActions([]);
     }
