@@ -15,6 +15,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 use function Filament\Support\original_request;
@@ -86,13 +87,42 @@ class SuratsTable
                 DeleteAction::make()
                     ->visible(fn(Surat $record): bool => $record->no_surat === null && SuratResource::canDelete($record)),
             ])
+            ->checkIfRecordIsSelectableUsing(fn (Surat $record): bool => self::canBulkDeleteRecord($record))
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->label('Hapus Terpilih')
-                        ->visible(fn (): bool => self::resolveNavigationSource() === 'surat-expired'),
+                        ->visible(fn (): bool => in_array(self::resolveNavigationSource(), ['surat-ditolak', 'surat-expired'], true))
+                        ->before(function (): void {
+                            self::setBulkDeleteAuditSource(request());
+                        })
+                        ->after(function (): void {
+                            self::clearBulkDeleteAuditSource(request());
+                        })
+                        ->authorizeIndividualRecords(fn (Surat $record): bool => self::canBulkDeleteRecord($record)),
                 ]),
             ]);
+    }
+
+    protected static function canBulkDeleteRecord(Surat $record): bool
+    {
+        return $record->no_surat === null && SuratResource::canDelete($record);
+    }
+
+    protected static function setBulkDeleteAuditSource(Request $request): void
+    {
+        $source = self::resolveNavigationSource();
+
+        if (! in_array($source, ['surat-ditolak', 'surat-expired'], true)) {
+            return;
+        }
+
+        $request->attributes->set('audit.bulk_delete_source', $source);
+    }
+
+    protected static function clearBulkDeleteAuditSource(Request $request): void
+    {
+        $request->attributes->remove('audit.bulk_delete_source');
     }
 
     protected static function resolveEditUrl(Model $record): string

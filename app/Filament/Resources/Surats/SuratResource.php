@@ -261,7 +261,8 @@ class SuratResource extends Resource
             return false;
         }
 
-        if (! original_request()->routeIs('filament.admin.resources.surats.surat-expired')) {
+        if (! original_request()->routeIs('filament.admin.resources.surats.surat-expired')
+            && ! original_request()->routeIs('filament.admin.resources.surats.surat-ditolak')) {
             return false;
         }
 
