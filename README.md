@@ -83,6 +83,35 @@ Opsional tetapi direkomendasikan:
 - Web server Apache atau Nginx
 - Process supervisor bila ingin memisahkan queue worker dari scheduler
 
+### Ekstensi PHP yang Harus Di-enable
+
+Pastikan ekstensi berikut aktif pada environment PHP (lokal maupun server):
+
+- `bcmath`
+- `ctype`
+- `curl`
+- `dom`
+- `fileinfo`
+- `json`
+- `mbstring`
+- `openssl`
+- `pdo`
+- `pdo_pgsql` (karena default database PostgreSQL)
+- `tokenizer`
+- `xml`
+
+Ekstensi yang sangat disarankan untuk kebutuhan umum Laravel:
+
+- `zip` (sering dipakai package manager dan ekspor/impor file)
+- `intl` (dukungan format lokal/internasional)
+- `gd` atau `imagick` (jika nanti ada kebutuhan manipulasi gambar)
+
+Cara cek cepat ekstensi yang aktif:
+
+```bash
+php -m
+```
+
 ## Cara Clone Proyek
 
 ```bash
@@ -260,6 +289,116 @@ Checklist Task Scheduler Windows:
 - Jalankan `php artisan migrate --force` saat deploy ke production.
 - Pastikan file upload dan folder `storage` dapat ditulis oleh service web server.
 - Jika trafik queue meningkat, pertimbangkan memisahkan queue worker menjadi service terpisah, meskipun konfigurasi saat ini sudah bisa dipicu lewat scheduler.
+
+## Optimasi Server (Filament 5)
+
+Agar panel admin Filament 5 dan proses backend berjalan lancar di production, gunakan checklist optimasi berikut.
+
+### 1) Mode Production Laravel
+
+- Pastikan `APP_ENV=production` dan `APP_DEBUG=false`.
+- Setelah deploy, jalankan:
+
+```bash
+php artisan optimize
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+Jika ada perubahan konfigurasi atau route, clear cache dulu:
+
+```bash
+php artisan optimize:clear
+```
+
+### 2) OPcache PHP (Wajib)
+
+Aktifkan OPcache untuk menurunkan waktu eksekusi PHP:
+
+```ini
+opcache.enable=1
+opcache.enable_cli=1
+opcache.memory_consumption=256
+opcache.interned_strings_buffer=16
+opcache.max_accelerated_files=20000
+opcache.validate_timestamps=0
+opcache.revalidate_freq=0
+```
+
+Catatan: jika `opcache.validate_timestamps=0`, restart PHP-FPM/Apache setiap kali deploy kode baru.
+
+### 3) Web Server dan PHP-FPM
+
+- Gunakan Nginx + PHP-FPM (atau Apache + PHP-FPM) untuk stabilitas beban menengah.
+- Sesuaikan parameter `pm.max_children`, `pm.start_servers`, `pm.max_requests` berdasarkan RAM server.
+- Set `client_max_body_size` (Nginx) atau `LimitRequestBody` (Apache) agar upload berkas surat tidak gagal.
+- Gunakan HTTP/2 dan gzip/brotli untuk mempercepat asset panel admin.
+
+### 4) Queue Worker Khusus
+
+Untuk produksi, jalankan worker sebagai service terpisah (Supervisor/systemd di Linux atau Task Scheduler/Service Manager di Windows), bukan hanya mengandalkan scheduler.
+
+Contoh worker:
+
+```bash
+php artisan queue:work --queue=default --sleep=1 --tries=3 --timeout=120 --max-time=3600
+```
+
+Lalu saat deploy:
+
+```bash
+php artisan queue:restart
+```
+
+### 5) Scheduler Harus Stabil
+
+- Pastikan `schedule:run` benar-benar berjalan setiap menit (cron Linux / Task Scheduler Windows).
+- Pantau log scheduler dan queue agar job Telegram atau expire booking tidak tertunda.
+
+### 6) Database PostgreSQL
+
+- Pastikan index tersedia untuk kolom yang sering difilter/sort (misal status surat, relasi user, timestamp).
+- Gunakan connection pooling (contoh: PgBouncer) jika jumlah koneksi mulai tinggi.
+- Jalankan `VACUUM`/`ANALYZE` berkala untuk menjaga performa query.
+
+### 7) Session, Cache, dan File Storage
+
+- Untuk beban tinggi, pertimbangkan Redis untuk `CACHE_STORE` dan `SESSION_DRIVER`.
+- Simpan storage pada disk cepat (SSD) dan pastikan permission folder `storage` + `bootstrap/cache` benar.
+- Gunakan CDN/reverse proxy bila akses panel berasal dari banyak lokasi jaringan.
+
+### 8) Monitoring Minimum
+
+- Pantau metrik CPU, RAM, disk I/O, dan latency database.
+- Pantau failed jobs (`php artisan queue:failed`) dan lakukan retry jika diperlukan.
+- Simpan log aplikasi dengan rotasi log agar disk tidak cepat penuh.
+
+### 9) Baseline Spesifikasi Server Production
+
+Berikut baseline praktis untuk deployment eSurat (Filament 5):
+
+| Skala Penggunaan | CPU | RAM | Storage | Catatan |
+| --- | --- | --- | --- | --- |
+| Kecil (<= 50 user aktif) | 2 vCPU | 4 GB | SSD 40-80 GB | App + DB bisa 1 server |
+| Menengah (50-200 user aktif) | 4 vCPU | 8 GB | SSD 80-160 GB | Disarankan pisah DB atau queue worker |
+| Besar (> 200 user aktif) | 8 vCPU+ | 16 GB+ | SSD 160 GB+ | Pisah app, DB, dan queue worker |
+
+Catatan baseline:
+
+- Gunakan SSD, bukan HDD, terutama untuk database dan folder `storage`.
+- Sediakan ruang kosong minimal 20-30% untuk mencegah degradasi performa.
+- Jika notifikasi Telegram dan job background meningkat, tambah instance worker sebelum menaikkan spesifikasi app server utama.
+
+### 10) Prioritas Scaling
+
+Jika aplikasi mulai lambat, urutan tindakan yang direkomendasikan:
+
+1. Aktifkan cache Laravel + OPcache dan validasi query lambat.
+2. Pisahkan queue worker dari web process.
+3. Pindahkan database ke server terpisah.
+4. Tambahkan Redis untuk cache/session.
+5. Scale-out app server di belakang reverse proxy/load balancer.
 
 ## Pengujian
 
