@@ -11,3 +11,8 @@ Artisan::command('inspire', function () {
 Schedule::command('surat:expire-bookings')
     ->everyMinute()
     ->withoutOverlapping();
+
+Schedule::command('queue:work --stop-when-empty --queue=default --tries=3 --sleep=1')
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->runInBackground();

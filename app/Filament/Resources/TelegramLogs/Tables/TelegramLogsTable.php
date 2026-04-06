@@ -22,9 +22,16 @@ class TelegramLogsTable
                 TextColumn::make('surat.no_surat')
                     ->label('No Surat')
                     ->searchable(),
+                TextColumn::make('surat.perihal')
+                    ->label('Perihal')
+                    ->searchable(),
+                TextColumn::make('surat.status')
+                    ->label('Status Surat')
+                    ->searchable(),
                 TextColumn::make('status')
+                    ->label('Status Notifikasi')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'pending' => 'warning',
                         'sent' => 'success',
                         'failed' => 'danger',
