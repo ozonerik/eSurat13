@@ -16,6 +16,16 @@ class ListDraftSurats extends ListRecords
 
     protected ?string $heading = 'Draft Surat';
 
+    /**
+     * @return array<string, string>
+     */
+    public function getBreadcrumbs(): array
+    {
+        return [
+            static::getResource()::getUrl('draft-surats') => 'Draft Surat',
+        ];
+    }
+
     protected function getTableQuery(): Builder|Relation|null
     {
         $user = Auth::user();

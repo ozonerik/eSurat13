@@ -12,7 +12,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
 #[Signature('surat:expire-bookings')]
-#[Description('Expire booked surat yang melewati batas 24 jam tanpa upload surat')]
+#[Description('Expire booked surat yang melewati waktu expired_at tanpa upload surat')]
 class ExpireBookedSuratCommand extends Command
 {
     /**
@@ -26,7 +26,8 @@ class ExpireBookedSuratCommand extends Command
             ->with('pembuat')
             ->where('status', Surat::STATUS_BOOKED)
             ->whereNull('surat_file_path')
-            ->where('created_at', '<=', now()->subDay())
+            ->whereNotNull('expired_at')
+            ->where('expired_at', '<=', now())
             ->orderBy('id')
             ->chunkById(100, function ($surats) use (&$expiredCount): void {
                 foreach ($surats as $surat) {
@@ -36,15 +37,18 @@ class ExpireBookedSuratCommand extends Command
                         if (
                             $surat->status !== Surat::STATUS_BOOKED
                             || filled($surat->surat_file_path)
-                            || $surat->created_at?->copy()->addDay()->isFuture()
+                            || blank($surat->expired_at)
+                            || $surat->expired_at->isFuture()
                         ) {
                             return;
                         }
 
-                        $releasedNumber = $surat->no_surat;
+                        $releasedNumber = $surat->released_no_surat ?: $surat->no_surat;
+                        $oldNumber = $surat->no_surat;
 
                         $surat->update([
                             'status' => Surat::STATUS_EXPIRED,
+                            'no_surat' => null,
                             'released_no_surat' => $releasedNumber,
                         ]);
 
@@ -52,16 +56,22 @@ class ExpireBookedSuratCommand extends Command
                             'surat_id' => $surat->id,
                             'user_id' => null,
                             'action' => 'booking_expired',
-                            'description' => 'Nomor surat dibatalkan otomatis karena melewati batas 24 jam.',
-                            'old_values' => ['status' => Surat::STATUS_BOOKED],
-                            'new_values' => ['status' => Surat::STATUS_EXPIRED],
+                            'description' => 'Nomor surat dibatalkan otomatis karena melewati batas waktu expired.',
+                            'old_values' => [
+                                'status' => Surat::STATUS_BOOKED,
+                                'no_surat' => $oldNumber,
+                            ],
+                            'new_values' => [
+                                'status' => Surat::STATUS_EXPIRED,
+                                'no_surat' => null,
+                            ],
                             'logged_at' => now(),
                         ]);
 
                         $chatId = $surat->pembuat?->telegram_chat_id;
                         $message = sprintf(
-                            "⚠️ Nomor surat *%s* telah dibatalkan otomatis karena tidak ada aktivitas dalam 24 jam.",
-                            $releasedNumber
+                            "[PERINGATAN] Nomor surat *%s* telah dibatalkan otomatis karena melewati batas waktu expired.",
+                            $oldNumber ?: '-'
                         );
 
                         $telegramLog = TelegramLog::create([

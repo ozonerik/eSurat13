@@ -16,6 +16,16 @@ class ListSuratDitolak extends ListRecords
 
     protected ?string $heading = 'Surat Ditolak';
 
+    /**
+     * @return array<string, string>
+     */
+    public function getBreadcrumbs(): array
+    {
+        return [
+            static::getResource()::getUrl('surat-ditolak') => 'Surat Ditolak',
+        ];
+    }
+
     protected function getTableQuery(): Builder|Relation|null
     {
         $user = Auth::user();

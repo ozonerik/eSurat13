@@ -40,6 +40,7 @@ class Surat extends Model
         'perihal',
         'tanggal_surat',
         'status',
+        'expired_at',
         'surat_file_path',
         'released_no_surat',
         'verification_token',
@@ -51,6 +52,7 @@ class Surat extends Model
     {
         return [
             'tanggal_surat' => 'date',
+            'expired_at' => 'datetime',
             'metadata' => 'array',
         ];
     }
@@ -65,6 +67,10 @@ class Surat extends Model
         static::saving(function (Surat $surat): void {
             if ($surat->isDirty('status')) {
                 $surat->clearViewedFlagsForStatus((string) $surat->status);
+            }
+
+            if ($surat->status === self::STATUS_BOOKED && blank($surat->expired_at)) {
+                $surat->expired_at = now()->addDay();
             }
 
             if (
@@ -122,7 +128,9 @@ class Surat extends Model
                 return;
             }
 
-            $isExpired = $surat->created_at?->copy()->addDay()->isPast() ?? false;
+            $expiresAt = $surat->expired_at ?? $surat->created_at?->copy()->addDay();
+            $surat->expired_at ??= $expiresAt;
+            $isExpired = $expiresAt?->isPast() ?? false;
             $surat->status = $isExpired ? self::STATUS_EXPIRED : self::STATUS_BOOKED;
         });
 
@@ -130,6 +138,7 @@ class Surat extends Model
             if (blank($surat->surat_file_path) && $surat->status === self::STATUS_DRAFT) {
                 $surat->updateQuietly([
                     'status' => self::STATUS_BOOKED,
+                    'expired_at' => now()->addDay(),
                 ]);
             }
         });

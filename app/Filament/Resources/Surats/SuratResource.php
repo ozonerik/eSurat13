@@ -255,6 +255,19 @@ class SuratResource extends Resource
 
     public static function canDeleteAny(): bool
     {
-        return false;
+        $user = Auth::user();
+
+        if (! $user instanceof User) {
+            return false;
+        }
+
+        if (! original_request()->routeIs('filament.admin.resources.surats.surat-expired')) {
+            return false;
+        }
+
+        return $user->canAny([
+            'surat.delete.null-number.all',
+            'surat.delete.null-number.own',
+        ]);
     }
 }

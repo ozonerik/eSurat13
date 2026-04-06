@@ -16,6 +16,16 @@ class ListSuratExpired extends ListRecords
 
     protected ?string $heading = 'Surat Expired';
 
+    /**
+     * @return array<string, string>
+     */
+    public function getBreadcrumbs(): array
+    {
+        return [
+            static::getResource()::getUrl('surat-expired') => 'Surat Expired',
+        ];
+    }
+
     protected function getTableQuery(): Builder|Relation|null
     {
         $user = Auth::user();

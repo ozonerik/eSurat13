@@ -33,6 +33,31 @@ class EditSurat extends EditRecord
             ->visible(fn (): bool => $this->isSaveActionVisible());
     }
 
+    /**
+     * @return array<Action>
+     */
+    protected function getFormActions(): array
+    {
+        if ($this->isEditingFromSuratExpired()) {
+            return [
+                Action::make('hapus_surat_expired')
+                    ->label('Hapus')
+                    ->color('danger')
+                    ->icon('heroicon-m-trash')
+                    ->requiresConfirmation()
+                    ->visible(fn (): bool => SuratResource::canDelete($this->record))
+                    ->action(function (): mixed {
+                        $this->delete();
+
+                        return $this->redirect(static::getResource()::getUrl('surat-expired'));
+                    }),
+                $this->getCancelFormAction(),
+            ];
+        }
+
+        return parent::getFormActions();
+    }
+
     protected function beforeSave(): void
     {
         $hasRevisedUpload = $this->hasRevisedUpload();
@@ -169,6 +194,11 @@ class EditSurat extends EditRecord
         return $this->navigationSource === 'surat-ditolak';
     }
 
+    protected function isEditingFromSuratExpired(): bool
+    {
+        return $this->navigationSource === 'surat-expired';
+    }
+
     protected function hasRevisedUpload(): bool
     {
         if ($this->hasUploadedRevision) {
@@ -286,6 +316,10 @@ class EditSurat extends EditRecord
 
     protected function isSaveActionVisible(): bool
     {
+        if ($this->isEditingFromSuratExpired()) {
+            return false;
+        }
+
         if ($this->isApprovedReadonlyContext()) {
             return false;
         }

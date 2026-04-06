@@ -16,6 +16,16 @@ class ListReviewSurat extends ListRecords
 
     protected ?string $heading = 'Review Surat';
 
+    /**
+     * @return array<string, string>
+     */
+    public function getBreadcrumbs(): array
+    {
+        return [
+            static::getResource()::getUrl('review-surats') => 'Review Surat',
+        ];
+    }
+
     protected function authorizeAccess(): void
     {
         parent::authorizeAccess();

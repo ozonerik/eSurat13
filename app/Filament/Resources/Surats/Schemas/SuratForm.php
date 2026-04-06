@@ -140,7 +140,10 @@ class SuratForm
 
                                 $set('no_surat', $noSurat);
                             })
-                            ->disabled(fn (Get $get): bool => blank($get('jenis_surat_id')) || filled($get('no_surat')))
+                            ->disabled(fn (Get $get): bool => request()->query('source') === 'surat-expired'
+                                || $get('status') === Surat::STATUS_EXPIRED
+                                || blank($get('jenis_surat_id'))
+                                || filled($get('no_surat')))
                     )
                     ->unique(ignoreRecord: true),
                 TextInput::make('perihal')

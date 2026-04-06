@@ -16,6 +16,16 @@ class ListSuratDisetujui extends ListRecords
 
     protected ?string $heading = 'Surat Disetujui';
 
+    /**
+     * @return array<string, string>
+     */
+    public function getBreadcrumbs(): array
+    {
+        return [
+            static::getResource()::getUrl('surat-disetujui') => 'Surat Disetujui',
+        ];
+    }
+
     protected function getTableQuery(): Builder|Relation|null
     {
         $user = Auth::user();

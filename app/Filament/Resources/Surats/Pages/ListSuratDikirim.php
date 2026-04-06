@@ -16,6 +16,16 @@ class ListSuratDikirim extends ListRecords
 
     protected ?string $heading = 'Surat Dikirim';
 
+    /**
+     * @return array<string, string>
+     */
+    public function getBreadcrumbs(): array
+    {
+        return [
+            static::getResource()::getUrl('surat-dikirim') => 'Surat Dikirim',
+        ];
+    }
+
     protected function getTableQuery(): Builder|Relation|null
     {
         $user = Auth::user();

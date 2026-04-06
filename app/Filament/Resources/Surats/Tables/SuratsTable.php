@@ -6,6 +6,8 @@ use App\Filament\Resources\Surats\SuratResource;
 use App\Models\KategoriSurat;
 use App\Models\JenisSurat;
 use App\Models\Surat;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
@@ -60,9 +62,6 @@ class SuratsTable
                     ->sortable(),
                 TextColumn::make('expired_at')
                     ->label('Expired At')
-                    ->state(fn(Surat $record) => $record->status === Surat::STATUS_BOOKED
-                        ? $record->created_at?->copy()->addDay()
-                        : null)
                     ->dateTime('d M Y H:i')
                     ->sortable(),
                 TextColumn::make('updated_at')
@@ -87,7 +86,13 @@ class SuratsTable
                 DeleteAction::make()
                     ->visible(fn(Surat $record): bool => $record->no_surat === null && SuratResource::canDelete($record)),
             ])
-            ->toolbarActions([]);
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
+                        ->label('Hapus Terpilih')
+                        ->visible(fn (): bool => self::resolveNavigationSource() === 'surat-expired'),
+                ]),
+            ]);
     }
 
     protected static function resolveEditUrl(Model $record): string
