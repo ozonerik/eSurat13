@@ -1,58 +1,288 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+	<img src="public/images/logo.webp" alt="Logo eSurat 13" width="160">
 </p>
 
-## About Laravel
+<h1 align="center">eSurat 13</h1>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+<p align="center">
+	Sistem administrasi surat sekolah berbasis Laravel dan Filament untuk pengelolaan surat, approval, audit trail, dan notifikasi Telegram.
+</p>
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+<p align="center">
+	<img src="https://img.shields.io/badge/Laravel-13-red" alt="Laravel 13">
+	<img src="https://img.shields.io/badge/PHP-8.3%2B-777bb4" alt="PHP 8.3+">
+	<img src="https://img.shields.io/badge/Filament-Admin%20Panel-f59e0b" alt="Filament">
+	<img src="https://img.shields.io/badge/Queue-Database-0f766e" alt="Queue Database">
+	<img src="https://img.shields.io/badge/Notifications-Telegram-229ED9" alt="Telegram">
+</p>
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Tentang Aplikasi
 
-## Learning Laravel
+eSurat 13 adalah aplikasi pengelolaan surat resmi yang dirancang untuk membantu sekolah atau institusi pendidikan mengelola proses surat secara lebih cepat, tertib, dan terdokumentasi. Aplikasi ini mendukung penomoran surat, alur persetujuan, pengarsipan, audit log, serta notifikasi Telegram agar proses kerja tidak bergantung pada komunikasi manual.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Panel administrasi aplikasi tersedia di `/admin`.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**Developer:** ozonerik IT Solutions
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Fitur Utama
 
-## Agentic Development
+- Manajemen master data surat seperti kategori, jenis surat, counter nomor surat, dan data sekolah.
+- Penomoran surat otomatis dengan mekanisme booking nomor surat.
+- Workflow status surat dari draft, dikirim, review, disetujui, ditolak, hingga expired.
+- Pembatalan otomatis nomor surat yang tidak dipakai setelah melewati masa berlaku booking.
+- Audit trail untuk mencatat perubahan penting pada surat.
+- Role dan permission berbasis database menggunakan Spatie Permission.
+- Notifikasi Telegram berbasis queue untuk pembuat surat dan approver.
+- Widget pemantauan kesehatan queue pada dashboard admin.
+- Seed data awal untuk role, permission, user, kategori surat, sekolah, dan contoh surat.
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Stack Teknologi
+
+- Backend: Laravel 13
+- Admin panel: Filament
+- PHP: 8.3+
+- Database default: PostgreSQL
+- Queue connection default: database
+- Frontend build tool: Vite
+- Authorization: spatie/laravel-permission
+
+## Changelog Ringkas
+
+### April 2026
+
+#### Notifikasi Telegram
+- Implementasi pengiriman notifikasi Telegram berbasis queue.
+- Penambahan log pengiriman Telegram dan penanganan retry saat gagal.
+- Perbaikan status pengiriman notifikasi Telegram agar lebih stabil.
+
+#### Scheduler dan Booking Surat
+- Menambahkan command `surat:expire-bookings` untuk membatalkan booking nomor surat yang kedaluwarsa.
+- Menjadwalkan proses queue dan pengecekan booking expired melalui Laravel scheduler.
+
+#### Workflow dan Hak Akses
+- Perbaikan alur draft surat, surat dikirim, surat disetujui, surat ditolak, dan review surat.
+- Permission diubah menjadi berbasis database agar lebih fleksibel.
+- Perbaikan validasi agar surat bernomor tidak dapat dihapus sembarangan.
+
+#### Penyempurnaan UI dan Data Awal
+- Penyesuaian label aksi dari buat/simpan menjadi kirim.
+- Penambahan faker user dan seed data awal untuk kebutuhan development.
+
+## Kebutuhan Sistem
+
+Sebelum instalasi, siapkan:
+
+- PHP 8.3 atau lebih baru
+- Composer
+- Node.js dan npm
+- PostgreSQL
+- Git
+
+Opsional tetapi direkomendasikan:
+
+- Web server Apache atau Nginx
+- Process supervisor bila ingin memisahkan queue worker dari scheduler
+
+## Cara Clone Proyek
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/ozonerik/eSurat13.git
+cd eSurat13
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Jika Anda melakukan fork atau menggunakan remote internal, sesuaikan URL repository pada perintah di atas.
 
-## Contributing
+## Instalasi Lokal
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 1. Install dependency backend dan frontend
 
-## Code of Conduct
+```bash
+composer install
+npm install
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 2. Buat file environment
 
-## Security Vulnerabilities
+Windows:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```powershell
+Copy-Item .env.example .env
+```
 
-## License
+Linux:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+cp .env.example .env
+```
+
+### 3. Atur konfigurasi `.env`
+
+Minimal sesuaikan variabel berikut:
+
+```env
+APP_NAME="eSurat 13"
+APP_URL=http://localhost:8000
+
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=esurat13
+DB_USERNAME=postgres
+DB_PASSWORD=
+
+QUEUE_CONNECTION=database
+CACHE_STORE=database
+
+TELEGRAM_BOT_NAME=nama_bot_anda
+TELEGRAM_BOT_TOKEN=token_bot_anda
+TELEGRAM_BASE_URL=https://api.telegram.org
+
+ESURAT_ADMIN_NAME="Administrator eSurat"
+ESURAT_ADMIN_EMAIL=admin@test.id
+ESURAT_ADMIN_PASSWORD=admin
+ESURAT_ADMIN_CHAT_ID=
+```
+
+### 4. Generate key, migrasi, seeding, dan storage link
+
+```bash
+php artisan key:generate
+php artisan migrate --seed
+php artisan storage:link
+```
+
+### 5. Build asset frontend
+
+Untuk development:
+
+```bash
+npm run dev
+```
+
+Untuk production build:
+
+```bash
+npm run build
+```
+
+### 6. Jalankan aplikasi
+
+Mode sederhana:
+
+```bash
+php artisan serve
+```
+
+Mode development terintegrasi sesuai script Composer:
+
+```bash
+composer run dev
+```
+
+Script di atas akan menjalankan:
+
+- web server Laravel
+- queue listener
+- Vite dev server
+
+## Shortcut Setup
+
+Repository ini menyediakan script Composer berikut:
+
+```bash
+composer run setup
+```
+
+Script tersebut akan menjalankan instalasi dependency, membuat `.env` jika belum ada, generate app key, migrasi database, install package frontend, dan build asset. Gunakan setelah konfigurasi environment Anda sudah benar.
+
+## Akun Default Development
+
+Setelah menjalankan seeder, akun berikut tersedia untuk kebutuhan pengujian lokal:
+
+| Role | Email | Password |
+| --- | --- | --- |
+| Admin | admin@test.id | admin |
+| Kepala Sekolah | kepsek@test.id | password |
+| Guru | guru@test.id | password |
+| TU | tu@test.id | password |
+| Kaprog | kaprog@test.id | password |
+| Wakil Kepala Sekolah | wakasek@test.id | password |
+| Pengelola Surat | pengelola@test.id | password |
+
+## Scheduler dan Queue di Server
+
+Aplikasi ini mengandalkan Laravel scheduler untuk dua proses penting:
+
+- Menjalankan command `surat:expire-bookings` setiap menit.
+- Menjalankan `queue:work --stop-when-empty --queue=default --tries=3 --sleep=1` setiap menit.
+
+Artinya, pada deployment standar, Anda wajib memastikan `php artisan schedule:run` berjalan setiap menit.
+
+### Linux (Cron)
+
+Tambahkan cron berikut pada user yang menjalankan aplikasi:
+
+```bash
+* * * * * cd /path/to/esurat13 && php artisan schedule:run >> /dev/null 2>&1
+```
+
+Jika PHP tidak ada di PATH, gunakan path absolut:
+
+```bash
+* * * * * cd /path/to/esurat13 && /usr/bin/php artisan schedule:run >> /dev/null 2>&1
+```
+
+### Windows Server (Task Scheduler)
+
+Anda bisa menambahkan task melalui Task Scheduler UI atau menggunakan `schtasks`.
+
+Contoh command:
+
+```cmd
+schtasks /create /sc minute /mo 1 /tn "eSurat13 Scheduler" /tr "cmd /c cd /d C:\path\to\esurat13 && C:\path\to\php.exe artisan schedule:run >> NUL 2>&1" /f
+```
+
+Ganti:
+
+- `C:\path\to\esurat13` dengan path proyek di server.
+- `C:\path\to\php.exe` dengan path executable PHP di server Anda.
+
+Checklist Task Scheduler Windows:
+
+1. Trigger berjalan setiap 1 menit.
+2. Opsi run whether user is logged on or not diaktifkan bila perlu.
+3. Working directory mengarah ke folder proyek.
+4. Akun service memiliki izin ke folder proyek, PHP, dan database.
+
+## Rekomendasi Deployment
+
+- Jalankan `php artisan optimize:clear` setelah update kode.
+- Jalankan `php artisan migrate --force` saat deploy ke production.
+- Pastikan file upload dan folder `storage` dapat ditulis oleh service web server.
+- Jika trafik queue meningkat, pertimbangkan memisahkan queue worker menjadi service terpisah, meskipun konfigurasi saat ini sudah bisa dipicu lewat scheduler.
+
+## Pengujian
+
+Untuk menjalankan test:
+
+```bash
+php artisan test
+```
+
+## Struktur Singkat
+
+- `app/Filament` berisi resource, page, dan widget panel admin.
+- `app/Services` berisi service penomoran surat dan integrasi Telegram.
+- `app/Jobs` berisi job pengiriman Telegram.
+- `app/Console/Commands` berisi command untuk proses booking surat expired.
+- `routes/console.php` berisi definisi scheduler aplikasi.
+
+## Catatan Pengembangan
+
+- Konfigurasi Telegram menggunakan `TELEGRAM_BOT_NAME`, `TELEGRAM_BOT_TOKEN`, dan `TELEGRAM_BASE_URL`.
+- Queue default menggunakan database, sehingga migrasi tabel jobs wajib dijalankan.
+- Untuk penggunaan lokal cepat, buka panel admin di `http://127.0.0.1:8000/admin` setelah server dijalankan.
+
+## Lisensi
+
+Repository ini mengikuti lisensi yang tercantum pada project. Jika akan digunakan ulang untuk institusi lain, sesuaikan identitas sekolah, alur persetujuan, dan template surat sebelum produksi.
