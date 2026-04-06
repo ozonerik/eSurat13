@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('telegram_chat_id', 32)->nullable()->unique()->after('email');
+            $table->string('telegram_chat_id', 32)->nullable()->default(null)->unique()->after('email');
         });
     }
 

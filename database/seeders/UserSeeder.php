@@ -33,7 +33,7 @@ class UserSeeder extends Seeder
                     'telp' => fake()->optional()->phoneNumber(),
                     'tanda_tangan' => null,
                     'is_active' => true,
-                    'telegram_chat_id' => (string) fake()->unique()->numberBetween(100000000, 999999999),
+                    'telegram_chat_id' => null,
                     'email_verified_at' => now(),
                     'password' => Hash::make('password'),
                     'remember_token' => Str::random(10),

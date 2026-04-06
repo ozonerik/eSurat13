@@ -39,6 +39,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'nip' => 'string',
+            'telegram_chat_id' => 'string',
             'is_active' => 'boolean',
         ];
     }

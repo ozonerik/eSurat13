@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Surat;
+use App\Observers\SuratObserver;
 use Illuminate\Support\ServiceProvider;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
@@ -21,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Surat::observe(SuratObserver::class);
+
         DatePicker::configureUsing(function (DatePicker $component): void {
             $component
                 ->displayFormat('d M Y')

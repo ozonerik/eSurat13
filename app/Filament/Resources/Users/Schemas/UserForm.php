@@ -35,6 +35,7 @@ class UserForm
                     ->unique(ignoreRecord: true),
                 TextInput::make('telegram_chat_id')
                     ->label('Telegram Chat ID')
+                    ->default(null)
                     ->maxLength(32)
                     ->unique(ignoreRecord: true),
                 FileUpload::make('tanda_tangan')
