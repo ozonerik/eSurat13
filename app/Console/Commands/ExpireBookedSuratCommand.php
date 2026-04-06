@@ -68,29 +68,23 @@ class ExpireBookedSuratCommand extends Command
                             'logged_at' => now(),
                         ]);
 
-                        $chatId = $surat->pembuat?->telegram_chat_id;
+                        $chatId = (string) ($surat->pembuat?->telegram_chat_id ?? '');
                         $message = sprintf(
                             "[PERINGATAN] Nomor surat *%s* telah dibatalkan otomatis karena melewati batas waktu expired.",
                             $oldNumber ?: '-'
                         );
 
-                        $telegramLog = TelegramLog::create([
-                            'surat_id' => $surat->id,
-                            'user_id' => $surat->pembuat_id,
-                            'chat_id' => (string) $chatId,
-                            'message' => $message,
-                            'status' => TelegramLog::STATUS_PENDING,
-                            'retry_count' => 0,
-                        ]);
-
-                        if ($chatId) {
-                            SendTelegramMessageJob::dispatch($telegramLog->id);
-                        } else {
-                            $telegramLog->update([
-                                'status' => TelegramLog::STATUS_FAILED,
-                                'failed_at' => now(),
-                                'response_body' => 'User telegram_chat_id is empty.',
+                        if ($this->isValidTelegramChatId($chatId)) {
+                            $telegramLog = TelegramLog::create([
+                                'surat_id' => $surat->id,
+                                'user_id' => $surat->pembuat_id,
+                                'chat_id' => $chatId,
+                                'message' => $message,
+                                'status' => TelegramLog::STATUS_PENDING,
+                                'retry_count' => 0,
                             ]);
+
+                            SendTelegramMessageJob::dispatch($telegramLog->id)->afterCommit();
                         }
 
                         $expiredCount++;
@@ -101,5 +95,10 @@ class ExpireBookedSuratCommand extends Command
         $this->info("{$expiredCount} surat booking expired diproses.");
 
         return self::SUCCESS;
+    }
+
+    protected function isValidTelegramChatId(string $chatId): bool
+    {
+        return preg_match('/^-?\d{5,32}$/', $chatId) === 1;
     }
 }

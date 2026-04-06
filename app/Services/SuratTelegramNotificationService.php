@@ -41,29 +41,30 @@ class SuratTelegramNotificationService
             ->get(['id', 'name', 'telegram_chat_id']);
 
         foreach ($users as $user) {
+            $chatId = (string) ($user->telegram_chat_id ?? '');
+
+            if (! $this->isValidTelegramChatId($chatId)) {
+                continue;
+            }
+
             $message = $this->buildMessage($surat, $user, $isRevision);
 
             $telegramLog = TelegramLog::create([
                 'surat_id' => $surat->id,
                 'user_id' => $user->id,
-                'chat_id' => (string) ($user->telegram_chat_id ?? ''),
+                'chat_id' => $chatId,
                 'message' => $message,
                 'status' => TelegramLog::STATUS_PENDING,
                 'retry_count' => 0,
             ]);
 
-            if (blank($user->telegram_chat_id)) {
-                $telegramLog->update([
-                    'status' => TelegramLog::STATUS_FAILED,
-                    'failed_at' => now(),
-                    'response_body' => 'User telegram_chat_id is empty.',
-                ]);
-
-                continue;
-            }
-
             SendTelegramMessageJob::dispatch($telegramLog->id)->afterCommit();
         }
+    }
+
+    protected function isValidTelegramChatId(string $chatId): bool
+    {
+        return preg_match('/^-?\d{5,32}$/', $chatId) === 1;
     }
 
     protected function buildMessage(Surat $surat, User $recipient, bool $isRevision): string

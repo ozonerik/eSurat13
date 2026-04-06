@@ -2,9 +2,13 @@
 
 namespace App\Filament\Pages\Auth;
 
+use App\Services\TelegramBotService;
+use Filament\Actions\Action;
 use Filament\Auth\Pages\EditProfile as BaseEditProfile;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 
 class EditProfile extends BaseEditProfile
@@ -49,6 +53,43 @@ class EditProfile extends BaseEditProfile
                     ->label('Telegram Chat ID')
                     ->default(null)
                     ->maxLength(32)
+                    ->suffixAction(
+                        Action::make('get_my_chat_id')
+                            ->label('Get My Chat ID')
+                            ->icon('heroicon-m-arrow-path')
+                            ->action(function (Set $set): void {
+                                $payload = 'profile_' . $this->getUser()->getKey();
+                                $chatId = app(TelegramBotService::class)->getChatIdFromStartPayload($payload);
+
+                                if ($chatId !== null) {
+                                    $set('telegram_chat_id', $chatId);
+
+                                    Notification::make()
+                                        ->success()
+                                        ->title('Telegram Chat ID ditemukan')
+                                        ->body('Chat ID berhasil diambil dari Telegram bot. Silakan klik Simpan.')
+                                        ->send();
+
+                                    return;
+                                }
+
+                                $botName = ltrim((string) config('services.telegram.bot_name', ''), '@');
+                                $startUrl = $botName !== ''
+                                    ? sprintf('https://t.me/%s?start=%s', $botName, $payload)
+                                    : null;
+
+                                $instruction = $startUrl
+                                    ? 'Buka tautan bot, kirim perintah /start, lalu klik tombol ini lagi: ' . $startUrl
+                                    : 'Pastikan TELEGRAM_BOT_NAME dan TELEGRAM_BOT_TOKEN sudah terisi, kirim /start ke bot, lalu klik tombol ini lagi.';
+
+                                Notification::make()
+                                    ->warning()
+                                    ->title('Chat ID belum ditemukan')
+                                    ->body($instruction)
+                                    ->persistent()
+                                    ->send();
+                            })
+                    )
                     ->unique(ignoreRecord: true),
                 FileUpload::make('tanda_tangan')
                     ->label('Tanda Tangan')

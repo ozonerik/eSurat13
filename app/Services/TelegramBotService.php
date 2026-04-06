@@ -45,4 +45,53 @@ class TelegramBotService
             ];
         }
     }
+
+    public function getChatIdFromStartPayload(string $payload): ?string
+    {
+        $token = (string) config('services.telegram.bot_token');
+
+        if ($token === '' || $payload === '') {
+            return null;
+        }
+
+        $baseUrl = rtrim((string) config('services.telegram.base_url', 'https://api.telegram.org'), '/');
+        $url = sprintf('%s/bot%s/getUpdates', $baseUrl, $token);
+
+        try {
+            $response = Http::timeout(15)->get($url, [
+                'limit' => 100,
+                'allowed_updates' => json_encode(['message']),
+            ]);
+
+            if (! $response->successful() || ! (bool) data_get($response->json(), 'ok', false)) {
+                return null;
+            }
+
+            $updates = data_get($response->json(), 'result', []);
+
+            if (! is_array($updates)) {
+                return null;
+            }
+
+            foreach (array_reverse($updates) as $update) {
+                $text = (string) data_get($update, 'message.text', '');
+
+                if ($text !== '/start '.$payload) {
+                    continue;
+                }
+
+                $chatId = data_get($update, 'message.chat.id');
+
+                if ($chatId === null) {
+                    continue;
+                }
+
+                return (string) $chatId;
+            }
+
+            return null;
+        } catch (Throwable) {
+            return null;
+        }
+    }
 }

@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\TelegramLogs;
 
-use App\Filament\Resources\TelegramLogs\Pages\CreateTelegramLog;
-use App\Filament\Resources\TelegramLogs\Pages\EditTelegramLog;
 use App\Filament\Resources\TelegramLogs\Pages\ListTelegramLogs;
 use App\Filament\Resources\TelegramLogs\Schemas\TelegramLogForm;
 use App\Filament\Resources\TelegramLogs\Tables\TelegramLogsTable;
@@ -53,8 +51,6 @@ class TelegramLogResource extends Resource
     {
         return [
             'index' => ListTelegramLogs::route('/'),
-            'create' => CreateTelegramLog::route('/create'),
-            'edit' => EditTelegramLog::route('/{record}/edit'),
         ];
     }
 
