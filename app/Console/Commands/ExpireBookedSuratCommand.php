@@ -2,10 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\SendTelegramMessageJob;
 use App\Models\AuditLog;
 use App\Models\Surat;
-use App\Models\TelegramLog;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
@@ -68,25 +66,6 @@ class ExpireBookedSuratCommand extends Command
                             'logged_at' => now(),
                         ]);
 
-                        $chatId = (string) ($surat->pembuat?->telegram_chat_id ?? '');
-                        $message = sprintf(
-                            "[PERINGATAN] Nomor surat *%s* telah dibatalkan otomatis karena melewati batas waktu expired.",
-                            $oldNumber ?: '-'
-                        );
-
-                        if ($this->isValidTelegramChatId($chatId)) {
-                            $telegramLog = TelegramLog::create([
-                                'surat_id' => $surat->id,
-                                'user_id' => $surat->pembuat_id,
-                                'chat_id' => $chatId,
-                                'message' => $message,
-                                'status' => TelegramLog::STATUS_PENDING,
-                                'retry_count' => 0,
-                            ]);
-
-                            SendTelegramMessageJob::dispatch($telegramLog->id)->afterCommit();
-                        }
-
                         $expiredCount++;
                     });
                 }
@@ -95,10 +74,5 @@ class ExpireBookedSuratCommand extends Command
         $this->info("{$expiredCount} surat booking expired diproses.");
 
         return self::SUCCESS;
-    }
-
-    protected function isValidTelegramChatId(string $chatId): bool
-    {
-        return preg_match('/^-?\d{5,32}$/', $chatId) === 1;
     }
 }
