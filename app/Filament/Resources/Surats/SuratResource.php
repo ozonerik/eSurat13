@@ -220,6 +220,18 @@ class SuratResource extends Resource
             return true;
         }
 
+        if ($record->status === Surat::STATUS_DISETUJUI && $user->can('surat.disetujui.read.all')) {
+            return true;
+        }
+
+        if ($record->status === Surat::STATUS_DITOLAK && $user->can('surat.ditolak.read.all')) {
+            return true;
+        }
+
+        if ($record->status === Surat::STATUS_EXPIRED && $user->can('surat.expired.read.all')) {
+            return true;
+        }
+
         if ($record->status !== Surat::STATUS_MENUNGGU_PERSETUJUAN) {
             return false;
         }

@@ -324,6 +324,10 @@ class EditSurat extends EditRecord
             return false;
         }
 
+        if ($this->isEditingFromSuratDitolak() && ! $this->isRevisionMode()) {
+            return false;
+        }
+
         if ($this->navigationSource === 'review-surats') {
             return false;
         }
