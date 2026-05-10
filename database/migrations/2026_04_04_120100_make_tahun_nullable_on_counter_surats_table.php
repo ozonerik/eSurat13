@@ -1,7 +1,9 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -10,7 +12,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement('ALTER TABLE counter_surats ALTER COLUMN tahun DROP NOT NULL');
+        Schema::table('counter_surats', function (Blueprint $table) {
+            $table->unsignedSmallInteger('tahun')->nullable()->change();
+        });
     }
 
     /**
@@ -22,6 +26,8 @@ return new class extends Migration
             ->whereNull('tahun')
             ->update(['tahun' => (int) now()->format('Y')]);
 
-        DB::statement('ALTER TABLE counter_surats ALTER COLUMN tahun SET NOT NULL');
+        Schema::table('counter_surats', function (Blueprint $table) {
+            $table->unsignedSmallInteger('tahun')->nullable(false)->change();
+        });
     }
 };
